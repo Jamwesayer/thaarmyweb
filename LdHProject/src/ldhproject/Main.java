@@ -5,12 +5,19 @@
  */
 package ldhproject;
 
+import connection.ConnectionSignaalDataBase;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -41,8 +48,12 @@ public class Main {
     private static ArrayList<Signaal> signalenLijst;
     private static DefaultTableModel table_model;
     private static JScrollPane scroller;
+    private static ConnectionSignaalDataBase signalDB;
     
-    public static void main(String[] args) throws ClassNotFoundException {
+    public static void main(String[] args) throws ClassNotFoundException, SQLException {
+        
+        signalDB = new ConnectionSignaalDataBase();
+        
         frame.setMinimumSize(new Dimension(WIDTH, HEIGHT));
         frame.setPreferredSize(new Dimension(WIDTH, HEIGHT));
         frame.setMaximumSize(new Dimension(WIDTH, HEIGHT));
@@ -57,6 +68,7 @@ public class Main {
         
         // List
         DefaultListModel<String> dlm = new DefaultListModel<String>();
+        
         //Signalen
         SignaalCalc mySignaalCalc = new SignaalCalc();
         lijst = mySignaalCalc.getSignalen();
@@ -67,6 +79,7 @@ public class Main {
         list.setBackground(Color.BLACK);
         
         scroller = new JScrollPane();  
+        
         //#Plagiaat LOL
         scroller.setPreferredSize(new Dimension(350, 200));
         scroller.getViewport().add(list);
@@ -109,14 +122,24 @@ public class Main {
         frame.pack();
         frame.setVisible(true);
         
-        knop3.addActionListener(getButtonAction());        
         knop1.addActionListener(showSignalenAction());
+        knop2.addActionListener(showSignalenDBAction());
+        knop3.addActionListener(getButtonAction()); 
+        
+        
     }
  
     private static ActionListener getButtonAction() {
         ActionListener action = (ActionEvent e) -> {
             System.out.println(list.getSelectedValue());
             lijst.get(list.getSelectedIndex()).addToSignalTable(table_model);
+            try {
+                addSignalToSignalDB();
+            } catch (SQLException ex) {
+                System.out.println(ex);
+            } catch (ParseException ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            }
         };
         return action;
     }
@@ -127,9 +150,8 @@ public class Main {
         
         ActionListener action = (ActionEvent e) -> {
             for(Signaal signaal : lijst){
-                System.out.println("fdsa");
                 signalenLijst.add(signaal);
-                dlm.addElement(signaal.getAlgemeneSignaal());
+                dlm.addElement(signaal.getalgemene_tekst());
             }
             list  = new JList(dlm);
             list.setBackground(Color.BLACK);
@@ -138,4 +160,31 @@ public class Main {
         return action;
     }
     
+    private static ActionListener showSignalenDBAction () {
+        
+        ActionListener action = (ActionEvent e) -> {
+            try {
+                showSignal();
+            } catch (SQLException ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        };
+        return action;
+    }    
+    
+    private static void addSignalToSignalDB() throws SQLException, ParseException, SQLException{
+        String sql = "INSERT INTO SignalenTabel "
+                + "VALUES(?,?,NULL,?,NULL,NULL,NULL,NULL);";
+        Signaal signaal = lijst.get(list.getSelectedIndex());
+        signalDB.insertSignal(sql, signaal.getalgemene_tekst(), signaal.getvariable_tekst());
+    }
+    
+    private static void showSignal() throws SQLException {
+        String sql = "SELECT * FROM SignalenTabel";
+        ArrayList<Signaal> requiredList = signalDB.showSignalen(sql);
+        for(Signaal signaal : requiredList) {
+            signalenLijst.add(signaal);
+            signaal.addToSignalTable(table_model);
+        }
+    }
 }

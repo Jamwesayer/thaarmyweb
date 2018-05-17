@@ -14,26 +14,26 @@ import javax.swing.table.DefaultTableModel;
  * @author J_Administrator
  */
 public class Signaal {
-    String algemeneSignaal;
-    String variableSignaal;
+    String algemene_tekst;
+    String variable_tekst;
     String connectieString;
     Date eersteOptreden;
     Date opgelost;
 
-    public String getAlgemeneSignaal() {
-        return algemeneSignaal;
+    public String getalgemene_tekst() {
+        return algemene_tekst;
     }
 
-    public void setAlgemeneSignaal(String algemeneSignaal) {
-        this.algemeneSignaal = algemeneSignaal;
+    public void setalgemene_tekst(String algemene_tekst) {
+        this.algemene_tekst = algemene_tekst;
     }
 
-    public String getVariableSignaal() {
-        return variableSignaal;
+    public String getvariable_tekst() {
+        return variable_tekst;
     }
 
-    public void setVariableSignaal(String variableSignaal) {
-        this.variableSignaal = variableSignaal;
+    public void setvariable_tekst(String variable_tekst) {
+        this.variable_tekst = variable_tekst;
     }
 
     public String getConnectieString() {
@@ -60,28 +60,27 @@ public class Signaal {
         this.opgelost = opgelost;
     }
     
-    public Signaal(String algemeneSignaal, String variableSignaal, String connectieString, Date eersteOptreden, Date opgelost) {
-        this.algemeneSignaal = algemeneSignaal;
-        this.variableSignaal = variableSignaal;        
+    public Signaal(String algemene_tekst, String variable_tekst, String connectieString, Date eersteOptreden, Date opgelost) {
+        this.algemene_tekst = algemene_tekst;
+        this.variable_tekst = variable_tekst;        
         this.connectieString = connectieString;
         this.eersteOptreden = eersteOptreden;
         this.opgelost = opgelost;
     }
     
-    public Signaal(String algemeneSignaal, String variableSignaal) {
-        this.algemeneSignaal = algemeneSignaal;
-        this.variableSignaal = variableSignaal;
+    public Signaal(String algemene_tekst, String variable_tekst) {
+        this.algemene_tekst = algemene_tekst;
+        this.variable_tekst = variable_tekst;
         this.eersteOptreden = Calendar.getInstance().getTime();
     }    
     
     public void showSignaal() {
-        //System.out.println(algemeneSignaal + " " + variableSignaal + " " + eersteOptreden);
+        //System.out.println(algemene_tekst + " " + variable_tekst + " " + eersteOptreden);
     }
     
     public boolean addToSignalTable(DefaultTableModel tableModel) {
         
-        tableModel.addRow(new Object[] {algemeneSignaal,variableSignaal,eersteOptreden,"NEE"});
-        
+        tableModel.addRow(new Object[] {algemene_tekst,variable_tekst,eersteOptreden,"NEE"});
         return false;
     }
 }
