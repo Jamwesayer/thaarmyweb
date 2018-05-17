@@ -40,12 +40,11 @@ public class ConnectionSignaalDataBase {
             //String url = "jdbc:sqlserver://localhost;databaseName=AuditBlackBox;integratedSecurity=true;";
 
             //---- For SQL server Authentication ----
-            url = "jdbc:sqlserver://localhost;databaseName=Test_Signaal_Database;";
-            user = "root";
-            pass = "wingedhawk0";
+            url = "jdbc:sqlserver://localhost;databaseName=Test_Signaal_Database;integratedSecurity=true";
+            
             
             Class.forName(driver);
-            conn = DriverManager.getConnection(url,user,pass);            
+            conn = DriverManager.getConnection(url);            
         }
         
         public void insertSignal(String sql_query, String first, String second) throws SQLException, ParseException{
