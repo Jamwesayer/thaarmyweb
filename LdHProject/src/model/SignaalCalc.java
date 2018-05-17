@@ -32,19 +32,28 @@ public class SignaalCalc {
             //String url = "jdbc:sqlserver://localhost;databaseName=AuditBlackBox;integratedSecurity=true;";
 
             //---- For SQL server Authentication ----
+          
+            /*
             url = "jdbc:sqlserver://localhost;databaseName=AuditBlackBox;";
             user = "root";
             pass = "wingedhawk0";             
             
             //getMedewerkers(driver, url, user, pass);
             bepaalSignaalAdAfas(driver, url, user, pass);
-            //bepaalSignaalClever(driver, url, user, pass);            
+            */
+            
+            url = "jdbc:sqlserver://localhost;databaseName=AuditBlackBox;integratedSecurity=true";
+            
+            //getMedewerkers(driver, url, user);
+            bepaalSignaalAdAfas(driver, url);
+            
+            //bepaalSignaalClever(driver, url);            
         }     
     
-    public void getMedewerkers(String driver, String url, String user, String pass) throws ClassNotFoundException {
+    public void getMedewerkers(String driver, String url) throws ClassNotFoundException {
         try {
             Class.forName(driver);
-            Connection con = DriverManager.getConnection(url,user,pass);
+            Connection con = DriverManager.getConnection(url);
             
             int count = 0;
             
@@ -79,13 +88,13 @@ public class SignaalCalc {
         }    
     }
     
-    public void bepaalSignaalAdAfas(String driver, String url, String user, String pass) throws ClassNotFoundException {
+    public void bepaalSignaalAdAfas(String driver, String url) throws ClassNotFoundException {
         
         signalenLijst = new ArrayList<Signaal>();
         
         try {
             Class.forName(driver);
-            Connection con = DriverManager.getConnection(url,user,pass);
+            Connection con = DriverManager.getConnection(url);
             
             String sql = "SELECT ad.Username_Pre2000, afas.EmployeeUsername, afas.ContractEndDate, ad.Disabled FROM [AfasProfit-Export] afas "
                     + "FULL OUTER JOIN [AD-Export] ad ON ad.Username_Pre2000 = afas.EmployeeUsername ";
@@ -125,12 +134,12 @@ public class SignaalCalc {
         
     }
     
-    public void bepaalSignaalClever(String driver, String url, String user, String pass) throws ClassNotFoundException {
+    public void bepaalSignaalClever(String driver, String url) throws ClassNotFoundException {
         ArrayList<String> signalenLijst = new ArrayList<String>();
         
         try {
             Class.forName(driver);
-            Connection con = DriverManager.getConnection(url,user,pass);
+            Connection con = DriverManager.getConnection(url);
             
             /*String sql = "SELECT ad.Username_Pre2000, afas.EmployeeUsername, afas.ContractEndDate, ad.Disabled FROM [AfasProfit-Export] afas "
                     + "FULL OUTER JOIN [AD-Export] ad ON ad.Username_Pre2000 = afas.EmployeeUsername ";*/
