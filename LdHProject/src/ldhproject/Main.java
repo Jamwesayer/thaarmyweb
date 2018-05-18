@@ -6,6 +6,7 @@
 package ldhproject;
 
 import connection.ConnectionSignaalDataBase;
+import excelExport.excelExportHandler;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -51,10 +52,12 @@ public class Main {
     private static DefaultTableModel table_model;
     private static JScrollPane scroller;
     private static ConnectionSignaalDataBase signalDB;
+    private static excelExportHandler myExport;
     
     public static void main(String[] args) throws ClassNotFoundException, SQLException {
         
         signalDB = new ConnectionSignaalDataBase();
+        myExport = new excelExportHandler(table_model);
         
         frame.setMinimumSize(new Dimension(WIDTH, HEIGHT));
         frame.setPreferredSize(new Dimension(WIDTH, HEIGHT));
@@ -115,6 +118,9 @@ public class Main {
         buttonCtr.add(knop2);
         JButton knop3 = new JButton("Add to signal Dataset");
         buttonCtr.add(knop3);
+        //export to excel file
+        JButton exportKnop = new JButton("export to excel");
+        buttonCtr.add(exportKnop);        
         JButton uitloggen = new JButton("Log out");
         buttonCtr.add(uitloggen);
         
@@ -131,6 +137,7 @@ public class Main {
         knop1.addActionListener(showSignalenAction());
         knop2.addActionListener(showSignalenDBAction());
         knop3.addActionListener(getButtonAction()); 
+        exportKnop.addActionListener(writeToExcelAction());
     }
  
     private static ActionListener getButtonAction() {
@@ -191,4 +198,13 @@ public class Main {
             signaal.addToSignalTable(table_model);
         }
     }
+    
+    private static ActionListener writeToExcelAction() {
+        ActionListener action = (ActionEvent e) -> {
+            myExport = new excelExportHandler(table_model);
+            myExport.writeToExcel();
+        };
+        return action;
+    }    
+    
 }
