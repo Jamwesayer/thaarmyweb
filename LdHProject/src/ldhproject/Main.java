@@ -22,10 +22,12 @@ import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
 import javax.swing.table.DefaultTableModel;
 import model.Signaal;
 import model.SignaalCalc;
@@ -59,7 +61,7 @@ public class Main {
         frame.setMaximumSize(new Dimension(WIDTH, HEIGHT));
         //frame.setAlwaysOnTop(true);
         frame.setLocationRelativeTo(null);
-        frame.setResizable(false);
+        frame.setResizable(true);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
         // Main Container
@@ -76,7 +78,7 @@ public class Main {
         
         list  = new JList(dlm);
         list.setName("SignaalList");
-        list.setBackground(Color.BLACK);
+        list.setBackground(Color.WHITE);
         
         scroller = new JScrollPane();  
         
@@ -87,7 +89,8 @@ public class Main {
         container.add(scroller, BorderLayout.EAST);
         
         // Table
-        String kolom_namen[] = {"Naam","Variable","Datum","Opgelost Datum"};
+        String kolom_namen[] = {"Naam","Variable","Connectiestring","Datum","Opgelost Datum"
+        ,"Impact matrix entiteiten", "Impact matrix organisaties"};
         
         JTable table = new JTable();
         JScrollPane tableSP = new JScrollPane(table);
@@ -97,7 +100,7 @@ public class Main {
         
         table.setBackground(Color.red);
         container.add(tableSP, BorderLayout.CENTER);
-        
+
         // Button Holder
         JPanel buttonCtr = new JPanel();
         buttonCtr.setBackground(Color.BLUE);
@@ -105,15 +108,18 @@ public class Main {
         buttonCtr.setLayout(new BoxLayout(buttonCtr, BoxLayout.Y_AXIS));
         
         // Buttons
-        JButton knop1 = new JButton("Actuele signalen tonen");
+        JButton knop1 = new JButton("Afwijkingen vanuit DB tonen");
         buttonCtr.add(knop1);
         //Later beter
-        JButton knop2 = new JButton("Afwijkingen vanuit DB tonen");
+        JButton knop2 = new JButton("Actuele signalen tonen");
         buttonCtr.add(knop2);
-        JButton knop3 = new JButton("Add to signal Database");
+        JButton knop3 = new JButton("Add to signal Dataset");
         buttonCtr.add(knop3);
         JButton uitloggen = new JButton("Log out");
         buttonCtr.add(uitloggen);
+        
+        JLabel label= new JLabel("<html><font color='red' size='5'>database is verbonden!</font></html>");
+        buttonCtr.add(label);
         
         container.putClientProperty("SignaalList", list);
         container.add(buttonCtr, BorderLayout.WEST);
@@ -125,8 +131,6 @@ public class Main {
         knop1.addActionListener(showSignalenAction());
         knop2.addActionListener(showSignalenDBAction());
         knop3.addActionListener(getButtonAction()); 
-        
-        
     }
  
     private static ActionListener getButtonAction() {
@@ -154,7 +158,7 @@ public class Main {
                 dlm.addElement(signaal.getalgemene_tekst());
             }
             list  = new JList(dlm);
-            list.setBackground(Color.BLACK);
+            list.setBackground(Color.WHITE);
             scroller.getViewport().add(list);
         };
         return action;
@@ -170,7 +174,7 @@ public class Main {
             }
         };
         return action;
-    }    
+    }
     
     private static void addSignalToSignalDB() throws SQLException, ParseException, SQLException{
         String sql = "INSERT INTO SignalenTabel "

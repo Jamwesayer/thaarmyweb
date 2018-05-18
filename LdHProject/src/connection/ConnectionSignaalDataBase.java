@@ -16,6 +16,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Scanner;
+import javax.swing.JOptionPane;
 import model.Signaal;
 
 /**
@@ -50,28 +51,57 @@ public class ConnectionSignaalDataBase {
             url = "jdbc:sqlserver://localhost;databaseName=Test_Signaal_Database;integratedSecurity=true";
             
             Class.forName(driver);
-            conn = DriverManager.getConnection(url);            
+            try{
+                conn = DriverManager.getConnection(url);
+            }   
+            catch(SQLException e)
+            {
+                infoBox(e.toString());
+            }
+            catch(Exception e)
+            {
+                infoBox(e.toString());
+            }
+        
             
         }
         
-        public void insertSignal(String sql_query, String first, String second) throws SQLException, ParseException{
-            String sql = sql_query;
-            prepStat = conn.prepareStatement(sql);
-            prepStat.setString(1, first);
-            prepStat.setString(2, second);
-            String lastCrawlDate = "2014-01-28";
-            Date utilDate = new SimpleDateFormat("yyyy-MM-dd").parse(lastCrawlDate);            
-            java.sql.Date sqlDate = new java.sql.Date(utilDate.getTime()); 
-            prepStat.setDate(3, sqlDate);
-            prepStat.executeUpdate();
+        public void insertSignal(String sql_query, String first, String second){
+            try{
+                String sql = sql_query;
+                prepStat = conn.prepareStatement(sql);
+                prepStat.setString(1, first);
+                prepStat.setString(2, second);
+                String lastCrawlDate = "2014-01-28";
+                Date utilDate = new SimpleDateFormat("yyyy-MM-dd").parse(lastCrawlDate);            
+                java.sql.Date sqlDate = new java.sql.Date(utilDate.getTime()); 
+                prepStat.setDate(3, sqlDate);
+                prepStat.executeUpdate();
+        
+            }
+            catch(SQLException e)
+            {
+                infoBox(e.toString());
+            }
+            catch(ParseException e)
+            {
+                infoBox(e.toString());
+            }
         }
         
-        public ArrayList<Signaal> showSignalen(String sql_query) throws SQLException{
+        public static void infoBox(String infoMessage)
+        {
+            JOptionPane.showMessageDialog(null, infoMessage, "Foutmelding", JOptionPane.INFORMATION_MESSAGE);
+        }
+        public ArrayList<Signaal> showSignalen(String sql_query){
+        try
+        {
             String sql = sql_query;
+
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
             ArrayList<Signaal> signalenLijst = new ArrayList<>();
-            
+
             while(rs.next()) { 
                 String algemeneTekst = rs.getString("Algemene_Tekst");
                 String variableTekst = rs.getString("Variable_Tekst");
@@ -79,7 +109,14 @@ public class ConnectionSignaalDataBase {
                 String optreding = rs.getString("Eerst_Optreding");
                 signalenLijst.add(new Signaal(algemeneTekst,variableTekst));
             }
-            
+
             return signalenLijst;
-        }            
+        }
+        catch(SQLException e)
+        {
+            infoBox(e.toString());
+        }
+        
+        return signalenLijst;
+    }
 }

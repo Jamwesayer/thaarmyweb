@@ -19,6 +19,8 @@ public class Signaal {
     String connectieString;
     Date eersteOptreden;
     Date opgelost;
+    String impactEntiteit;
+    String impactOrganisatie;
 
     public String getalgemene_tekst() {
         return algemene_tekst;
@@ -80,7 +82,8 @@ public class Signaal {
     
     public boolean addToSignalTable(DefaultTableModel tableModel) {
         
-        tableModel.addRow(new Object[] {algemene_tekst,variable_tekst,eersteOptreden,"NEE"});
+        tableModel.addRow(new Object[] {algemene_tekst,variable_tekst,"connectie",eersteOptreden,"NEE"
+                ,impactEntiteit,impactOrganisatie});
         return false;
     }
 }
