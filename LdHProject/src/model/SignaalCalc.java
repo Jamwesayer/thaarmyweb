@@ -5,12 +5,18 @@
  */
 package model;
 
+import connection.ConnectionStringDataBase;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  *
@@ -23,31 +29,23 @@ public class SignaalCalc {
         String user;
         String pass;
         ArrayList<Signaal> signalenLijst;
+        ConnectionString CS;
+        ConnectionStringDataBase CSDB;
         
         
-        public SignaalCalc() throws ClassNotFoundException {
+    public SignaalCalc() throws ClassNotFoundException, ParseException, ParseException, SQLException {
             driver = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
-
-            //---- For Windows Authentication ----
-            //String url = "jdbc:sqlserver://localhost;databaseName=AuditBlackBox;integratedSecurity=true;";
-
-            //---- For SQL server Authentication ----
-          
-            /*
-            url = "jdbc:sqlserver://localhost;databaseName=AuditBlackBox;";
-            user = "root";
-            pass = "wingedhawk0";             
+            url = "jdbc:sqlserver://localhost;integratedSecurity=true";
             
-            //getMedewerkers(driver, url, user, pass);
-            bepaalSignaalAdAfas(driver, url, user, pass);
-            */
+            Connection con = DriverManager.getConnection(url);            
+            DatabaseMetaData dmd = con.getMetaData();
+            String dmdUrl = dmd.getURL();
             
-            url = "jdbc:sqlserver://localhost;databaseName=AuditBlackBox;integratedSecurity=true";
+            Timestamp timestamp = new Timestamp(System.currentTimeMillis());            
             
-            //getMedewerkers(driver, url, user);
+            CS = new ConnectionString("localhost","USER","AuditBlackBox",timestamp);
+            CSDB = new ConnectionStringDataBase();
             bepaalSignaalAdAfas(driver, url);
-            
-            //bepaalSignaalClever(driver, url);            
         }     
     
     public void getMedewerkers(String driver, String url) throws ClassNotFoundException {
@@ -73,12 +71,8 @@ public class SignaalCalc {
                 String medewerkerCodes = rs.getString("MedewerkerNummer");
                 String naam = rs.getString("Naam");
                 String organisatieID = rs.getString("organisatieEenheidID");
-                
-                //System.out.println(persoonId + " " + codeId + " " 
-                //        + medewerkerCodes + " " + organisatieID + " " + naam);
                 count++;
             }
-            //System.out.println(count);
         }
         catch(SQLException e) {
              e.printStackTrace();
@@ -88,7 +82,26 @@ public class SignaalCalc {
         }    
     }
     
-    public void bepaalSignaalAdAfas(String driver, String url) throws ClassNotFoundException {
+    public boolean checkDuplicate(String auditName, ArrayList<Signaal> signaal) {
+        
+                String[] checkers = {"profit","ad","onbekend"};
+                boolean duplicate = false;
+                
+                for(Signaal i : signaal){
+                    if(i.getUserID().replaceAll("\\s+","").equals(auditName.replaceAll("\\s+",""))){
+                        for(String check : checkers){
+                            if(i.getSignaalType().replaceAll("\\s+","").equals(check)) {
+                                duplicate = true; 
+                                break;
+                            }
+                        }
+                        break;
+                    }
+                }  
+                return duplicate;
+    }
+    
+    public void bepaalSignaalAdAfas(String driver, String url) throws ClassNotFoundException, ParseException {
         
         signalenLijst = new ArrayList<Signaal>();
         
@@ -96,28 +109,39 @@ public class SignaalCalc {
             Class.forName(driver);
             Connection con = DriverManager.getConnection(url);
             
-            String sql = "SELECT ad.Username_Pre2000, afas.EmployeeUsername, afas.ContractEndDate, ad.Disabled FROM [AfasProfit-Export] afas "
+            String sql = "use AuditBlackBox SELECT ad.Username_Pre2000, afas.EmployeeUsername, afas.ContractEndDate, ad.Disabled FROM [AfasProfit-Export] afas "
                     + "FULL OUTER JOIN [AD-Export] ad ON ad.Username_Pre2000 = afas.EmployeeUsername ";
             Statement stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
             
             while(rs.next()) {
+                //Attributes
                 String employerName = rs.getString("Username_Pre2000");
                 String auditName = rs.getString("EmployeeUsername");
                 String eindDatum = rs.getString("ContractEndDate");
                 int disabled = rs.getInt("Disabled");
-                
-                //System.out.println(employerName + " " + auditName + " " + eindDatum + " " + disabled);
+                //Date
+                Date date = new Date();
+                String lastCrawlDate = new SimpleDateFormat("yyyy-MM-dd").format(date);
+                Date utilDate = new SimpleDateFormat("yyyy-MM-dd").parse(lastCrawlDate); 
+                java.sql.Date sqlDate = new java.sql.Date(utilDate.getTime());
+                Signaal signal;
+                //Add
                 if(eindDatum != null && disabled == 0) {
-                    signalenLijst.add(new Signaal(auditName + " Medewerker uit dienst in Profit , account is in AD actief","PROFIT-MISSING"));
+                    signal = new Signaal(auditName, 9, "profit", auditName + " Medewerker uit dienst in Profit , account is in AD actief", "PROFIT-MISSING",sqlDate);
+                    signalenLijst.add(signal);
                 }
                 if(employerName == null) {
-                    signalenLijst.add(new Signaal("RDS " + auditName + " in Profit bestaat niet in de AD ","AD-MISSING"));
+                    signal = new Signaal(auditName, 9, "ad", "RDS " + auditName + " in Profit bestaat niet in de AD ", "AD-MISSING",sqlDate);
+                    signalenLijst.add(signal);
                 }
                 if(auditName == null) {
-                    signalenLijst.add(new Signaal(employerName + " AD Account, onbekend in Profit", "ONBEKEND-PROFIT"));
+                    signal = new Signaal(employerName, 9, "onbekend", employerName + " AD Account, onbekend in Profit", "ONBEKEND-PROFIT",sqlDate);
+                    signalenLijst.add(signal);
                 }
+                
             }
+            CSDB.insertConnectionString(CS);            
         }
         catch(SQLException e) {
              e.printStackTrace();
@@ -125,12 +149,6 @@ public class SignaalCalc {
         finally {
             
         }
-        
-        for(Signaal object : signalenLijst) {
-            object.showSignaal();
-        }
-        
-        //System.out.println(signalenLijst.size() + " signalen gevonden");
         
     }
     
@@ -153,8 +171,7 @@ public class SignaalCalc {
             while(rs.next()) {
                 String employerName = rs.getString("Voornaam");
                 String Persoon = rs.getString("ID");
-                String adId = rs.getString("ADUserID");
-                //System.out.println(employerName + " " + adId + " " + Persoon);   
+                String adId = rs.getString("ADUserID");   
             }
         }
         catch(SQLException e) {

@@ -11,12 +11,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Scanner;
 import javax.swing.JOptionPane;
+import model.ConnectionString;
 import model.Signaal;
 
 /**
@@ -26,7 +27,6 @@ import model.Signaal;
 public class ConnectionSignaalDataBase {
         
         Connection conn;
-        //Scanner sc;
         PreparedStatement prepStat;    
         String driver;
         String url;
@@ -34,89 +34,85 @@ public class ConnectionSignaalDataBase {
         String pass;
         ArrayList<Signaal> signalenLijst;
         
-        public ConnectionSignaalDataBase() throws ClassNotFoundException, SQLException {
+        public ConnectionSignaalDataBase() throws ClassNotFoundException {
             driver = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
-
-            //---- For Windows Authentication ----
-            //String url = "jdbc:sqlserver://localhost;databaseName=AuditBlackBox;integratedSecurity=true;";
-
-            //---- For SQL server Authentication ----
-           /* url = "jdbc:sqlserver://localhost;databaseName=Test_Signaal_Database;";
-            user = "root";
-            pass = "wingedhawk0";
-            
+            url = "jdbc:sqlserver://localhost;integratedSecurity=true";
             Class.forName(driver);
-            conn = DriverManager.getConnection(url,user,pass);            
-            */
-            url = "jdbc:sqlserver://localhost;databaseName=Test_Signaal_Database;integratedSecurity=true";
             
-            Class.forName(driver);
-            try{
+            try {
                 conn = DriverManager.getConnection(url);
             }   
-            catch(SQLException e)
-            {
+            catch(SQLException e) {
                 infoBox(e.toString());
             }
-            catch(Exception e)
-            {
+            catch(Exception e) {
                 infoBox(e.toString());
-            }
-        
-            
+            } 
         }
         
-        public void insertSignal(String sql_query, String first, String second){
+        public void insertSignal(String sql_query, String userId, String signaalType, String algemeen, String variable){
             try{
                 String sql = sql_query;
+                
+                Date date = new Date();
+                String lastCrawlDate = new SimpleDateFormat("yyyy-MM-dd").format(date);
+                Date utilDate = new SimpleDateFormat("yyyy-MM-dd").parse(lastCrawlDate); 
+                java.sql.Date sqlDate = new java.sql.Date(utilDate.getTime());                
+                
                 prepStat = conn.prepareStatement(sql);
-                prepStat.setString(1, first);
-                prepStat.setString(2, second);
-                String lastCrawlDate = "2014-01-28";
-                Date utilDate = new SimpleDateFormat("yyyy-MM-dd").parse(lastCrawlDate);            
-                java.sql.Date sqlDate = new java.sql.Date(utilDate.getTime()); 
-                prepStat.setDate(3, sqlDate);
+                prepStat.setString(1, userId);
+                prepStat.setString(2, signaalType);
+                prepStat.setString(3, algemeen);
+                prepStat.setString(4, variable);
+                prepStat.setDate(5, sqlDate);
                 prepStat.executeUpdate();
-        
             }
-            catch(SQLException e)
-            {
-                infoBox(e.toString());
-            }
-            catch(ParseException e)
-            {
+            catch(SQLException | ParseException e) {
                 infoBox(e.toString());
             }
         }
         
-        public static void infoBox(String infoMessage)
-        {
+        public static void infoBox(String infoMessage) {
             JOptionPane.showMessageDialog(null, infoMessage, "Foutmelding", JOptionPane.INFORMATION_MESSAGE);
         }
-        public ArrayList<Signaal> showSignalen(String sql_query){
-        try
-        {
-            String sql = sql_query;
-
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sql);
-            ArrayList<Signaal> signalenLijst = new ArrayList<>();
-
-            while(rs.next()) { 
-                String algemeneTekst = rs.getString("Algemene_Tekst");
-                String variableTekst = rs.getString("Variable_Tekst");
-                String opgelost = rs.getString("Opgelost");
-                String optreding = rs.getString("Eerst_Optreding");
-                signalenLijst.add(new Signaal(algemeneTekst,variableTekst));
-            }
-
-            return signalenLijst;
-        }
-        catch(SQLException e)
-        {
-            infoBox(e.toString());
-        }
         
+        public ArrayList<Signaal> showSignalen(String sql_query){
+            try {
+                String sql = sql_query;
+
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(sql);
+                ArrayList<Signaal> signalenLijst = new ArrayList<>();
+
+                while(rs.next()) { 
+                    String userId = rs.getString("userId");
+                    String signaalType = rs.getString("signaalType");
+                    String algemeneTekst = rs.getString("Algemene_Tekst");
+                    String variableTekst = rs.getString("Variable_Tekst");
+                    int connectionString = rs.getInt("Connectie_String");
+                    Date opgelost = rs.getDate("Eerst_Optreding");
+                    Signaal signal = new Signaal(userId, connectionString, signaalType, algemeneTekst,variableTekst,opgelost);
+                    
+                    sql = "use Test_Signaal_Database SELECT * FROM ConnectionString WHERE ConnectionID = " + connectionString;
+                    Statement stmts = conn.createStatement();
+                    ResultSet rss = stmts.executeQuery(sql);
+                    while(rss.next()) {
+                        String servernaam = rss.getString("ServerNaam");
+                        String userConnectie = rss.getString("UserConnectie");
+                        String databaseNaam = rss.getString("DatabaseNaam");
+                        Timestamp timestamp = rss.getTimestamp("Timestamp");
+                        
+                        signal.setConnection(new ConnectionString(servernaam, userConnectie, databaseNaam, timestamp));
+                    }
+                    
+                    signalenLijst.add(signal);
+                }
+                return signalenLijst;
+            }
+            catch(SQLException e) {
+                System.out.println(e);
+                infoBox(e.toString());
+            }
         return signalenLijst;
     }
 }
