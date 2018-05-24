@@ -9,6 +9,7 @@ import static connection.ConnectionSignaalDataBase.infoBox;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import model.ConnectionString;
 
@@ -39,23 +40,32 @@ public class ConnectionStringDataBase {
             } 
         }
         
-        public void insertConnectionString(ConnectionString connectionString){
+        public int insertConnectionString(ConnectionString connectionString){
+            
+            int identity = 0;
+            
             try{
                 String sql = "use Test_Signaal_Database "
                     + "INSERT INTO ConnectionString "
-                    + "VALUES(?,?,?,?);";
+                    + "VALUES(?,?,?,?); "
+                    + "SELECT SCOPE_IDENTITY() AS you;";
                 
-                prepStat = conn.prepareStatement(sql);     
+                prepStat = conn.prepareStatement(sql);
                 
                 ConnectionString CS = connectionString;
-                prepStat.setString(1, CS.getDatabaseName());
-                prepStat.setString(2, CS.getServerNaam());
-                prepStat.setString(3, CS.getUserConnectie());
+                prepStat.setString(1, CS.getServerNaam());
+                prepStat.setString(2, CS.getUserConnectie());
+                prepStat.setString(3, CS.getDatabaseName());
                 prepStat.setTimestamp(4, CS.getTimestamp());
-                prepStat.executeUpdate();
+                //prepStat.executeUpdate();
+                ResultSet rs = prepStat.executeQuery();
+                while(rs.next()) {
+                    identity = rs.getInt("you");
+                }
             }
             catch(SQLException e) {
                 infoBox(e.toString());
             }
+            return identity;            
         }        
 }

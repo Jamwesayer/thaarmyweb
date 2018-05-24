@@ -6,6 +6,7 @@
 package ldhproject;
 
 import connection.ConnectionSignaalDataBase;
+import connection.ConnectionStringDataBase;
 import excelExport.excelExportHandler;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -34,7 +35,6 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import model.ConnectionString;
 import model.Signaal;
-import model.SignaalCalc;
 
 /**
  *
@@ -153,6 +153,8 @@ public class Main {
                 addSignalDataset();
             } catch (SQLException ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (ClassNotFoundException ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
         };
         return action;
@@ -198,13 +200,14 @@ public class Main {
             scroller.getViewport().add(list);        
     }
     
-    private static void addSignalDataset() throws SQLException{
+    private static void addSignalDataset() throws SQLException, ClassNotFoundException{
         
             Signaal signaal =  lijst.get(list.getSelectedIndex());
             if(!mySignaalCalc.checkDuplicate(signaal.getUserID(),signalenLijst)) {
-                
+                ConnectionStringDataBase CSDB = new ConnectionStringDataBase();
+                int lastId = CSDB.insertConnectionString(mySignaalCalc.getCS());
+                signaal.setConnectieString(lastId);
                 setConnectionForSignal(signaal);
-                
                 signalenLijst.add(signaal);
                 signaal.addToSignalTable(table_model);
                 try {
@@ -223,9 +226,13 @@ public class Main {
     private static void addSignalToSignalDB() throws SQLException, ParseException {
         String sql = "use Test_Signaal_Database "
                 + "INSERT INTO SignalenTabel "
-                + "VALUES(?,?,?,?,9,?,NULL,NULL,NULL,NULL);";
+                + "VALUES(?,?,?,?,?,?,NULL,NULL,NULL);";
         Signaal signaal = lijst.get(list.getSelectedIndex());
-        signalDB.insertSignal(sql, signaal.getUserID(), signaal.getSignaalType(), signaal.getAlgemene_tekst(), signaal.getVariable_tekst());
+        signalDB.insertSignal(sql, signaal.getUserID(), signaal.getSignaalType(), signaal.getAlgemene_tekst(), signaal.getConnectieString(), signaal.getVariable_tekst());
+    }
+    
+    private static void getLatestConnectionString() {
+        String sql = "use Test_Signaal_Database";
     }
     
     private static void showSignalenDB() throws SQLException {
@@ -247,12 +254,13 @@ public class Main {
         String sql = "use Test_Signaal_Database SELECT * FROM ConnectionString WHERE ConnectionID = " + signal.getConnectieString();
         Statement stmts = con.createStatement();
         ResultSet rss = stmts.executeQuery(sql);
+        
         while(rss.next()) {
+            
             String servernaam = rss.getString("ServerNaam");
             String userConnectie = rss.getString("UserConnectie");
             String databaseNaam = rss.getString("DatabaseNaam");
             Timestamp timestamp = rss.getTimestamp("Timestamp");
-
             signal.setConnection(new ConnectionString(servernaam, userConnectie, databaseNaam, timestamp));
         }    
         return signal;

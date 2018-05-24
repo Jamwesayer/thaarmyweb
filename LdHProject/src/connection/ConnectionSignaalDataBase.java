@@ -50,7 +50,8 @@ public class ConnectionSignaalDataBase {
             } 
         }
         
-        public void insertSignal(String sql_query, String userId, String signaalType, String algemeen, String variable){
+        public void insertSignal(String sql_query, String userId, String signaalType, String algemeen, int connectieString, String variable){
+            
             try{
                 String sql = sql_query;
                 
@@ -64,11 +65,14 @@ public class ConnectionSignaalDataBase {
                 prepStat.setString(2, signaalType);
                 prepStat.setString(3, algemeen);
                 prepStat.setString(4, variable);
-                prepStat.setDate(5, sqlDate);
+                prepStat.setInt(5, connectieString);
+                prepStat.setDate(6, sqlDate);
                 prepStat.executeUpdate();
             }
+            
             catch(SQLException | ParseException e) {
-                infoBox(e.toString());
+                //infoBox(e.toString());
+                System.out.println(e);
             }
         }
         

@@ -95,13 +95,7 @@ public class Signaal {
             } catch (NoSuchFieldException | SecurityException ex) {
                 Logger.getLogger(Signaal.class.getName()).log(Level.SEVERE, null, ex);
             }
-            /*try {
-                System.out.print(hadouken + " ");
-            } catch (IllegalArgumentException ex) {
-                Logger.getLogger(Signaal.class.getName()).log(Level.SEVERE, null, ex);
-            }*/
         }
-        //System.out.println("");
     }
 
     public Object[] generateSignal() {
@@ -109,7 +103,7 @@ public class Signaal {
                 ,eersteOptreden ,opgelost ,impactEntiteit ,impactOrganisatie };
     }
     
-    public boolean addToSignalTable(DefaultTableModel tableModel) {
+    public boolean addToSignalTable(DefaultTableModel tableModel) {   
         tableModel.addRow(new Object[] {algemene_tekst,variable_tekst,connection.getConnectionString(),eersteOptreden,opgelost
                 ,impactEntiteit,impactOrganisatie});
         return false;
