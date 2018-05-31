@@ -31,7 +31,7 @@ public class Signaal {
     private String impactOrganisatie;
     private ConnectionString connection;
     
-    public Signaal(String userID, int connectieString, String signaalType, String algemene_tekst, String variable_tekst, Date eersteOptreden, Date opgelost) {
+    public Signaal(String userID, String signaalType, String algemene_tekst, String variable_tekst, int connectieString, Date eersteOptreden, Date opgelost) {
         this.userID = userID;
         this.signaalType = signaalType;
         this.algemene_tekst = algemene_tekst;

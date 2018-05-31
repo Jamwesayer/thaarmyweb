@@ -10,12 +10,19 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.sql.SQLException;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import model.Signaal;
+import model.SignaalLijst;
 
 /**
  *
@@ -50,10 +57,26 @@ public class RechterPanel extends JPanel {
     {
         model = new DefaultListModel();
         
-        for (int i = 0; i < 15; i++)
+        SignaalLijst mySignaalCalc;
+        ArrayList<Signaal> lijst;
+        try {
+            mySignaalCalc = new SignaalLijst();
+            lijst = mySignaalCalc.getSignalen();
+            for(Signaal i : lijst){
+                model.addElement(i.getAlgemene_tekst());
+            }
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(AfwijkingLijst.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ParseException ex) {
+            Logger.getLogger(AfwijkingLijst.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
+            Logger.getLogger(AfwijkingLijst.class.getName()).log(Level.SEVERE, null, ex);
+        }        
+        
+        /*for (int i = 0; i < 15; i++)
         {
             model.addElement("Element " + i);
-        }
+        }*/
         
         jList = new JList(model);
         scroller = new JScrollPane(jList);

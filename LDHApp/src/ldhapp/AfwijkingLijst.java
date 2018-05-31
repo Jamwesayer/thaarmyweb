@@ -19,7 +19,7 @@ import javax.swing.JScrollPane;
  *
  * @author mucis
  */
-class AfwijkingLijst extends JPanel{
+class AfwijkingLijst extends JPanel {
     private JList jList;
     private static JScrollPane scroller;
     

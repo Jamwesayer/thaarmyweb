@@ -100,10 +100,8 @@ public class ConnectionSignaalDataBase {
                     String algemeneTekst = rs.getString("Algemene_Tekst");
                     String variableTekst = rs.getString("Variable_Tekst");
                     int connectionString = rs.getInt("Connectie_String");
-                    Date optreding = rs.getDate("Eerst_Optreding");
-                    Date opgelost = rs.getDate("Opgelost");
-                    //Signaal signal = new Signaal(userId, connectionString, signaalType, algemeneTekst,variableTekst,optreding);
-                    Signaal signal = new Signaal(userId, connectionString, signaalType, algemeneTekst,variableTekst,optreding,opgelost);
+                    Date opgelost = rs.getDate("Eerst_Optreding");
+                    Signaal signal = new Signaal(userId, connectionString, signaalType, algemeneTekst,variableTekst,opgelost);
                     
                     sql = "use Test_Signaal_Database SELECT * FROM ConnectionString WHERE ConnectionID = " + connectionString;
                     Statement stmts = conn.createStatement();
