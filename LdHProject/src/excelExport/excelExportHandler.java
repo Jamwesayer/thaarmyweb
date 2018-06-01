@@ -28,15 +28,17 @@ public class excelExportHandler {
     
     private DefaultTableModel table_model;
     
+    //Constructor
     public excelExportHandler(DefaultTableModel table_model){
         this.table_model = table_model;
     }
     
+    //Voor het ophalen van een cell waarde van de tablemodel
     private String getCellValue(int x, int y) {
         return table_model.getValueAt(y, x) != null ? table_model.getValueAt(y, x).toString() : "";
     }
 
-    //write files to excel
+    //schrijft het bestand naar excel
     public void writeToExcel() {
         XSSFWorkbook wb = new XSSFWorkbook();
         XSSFSheet ws = wb.createSheet();
@@ -49,13 +51,12 @@ public class excelExportHandler {
         int rowID = 0;
 
         for (int i = 0; i < (table_model.getRowCount()); i++) {
-
-            //  data.put("0"+i, new Object[]{table_model.getColumnName(i)});
             for (int j = 0; j < (table_model.getColumnCount()); j++) {
                 newo[j] = getCellValue(j, i);
             }
             data.put(count + "", newo);
             count++;
+            
             //write to sheet
             Set<String> ids = data.keySet();
             XSSFRow row;
@@ -75,10 +76,9 @@ public class excelExportHandler {
         //write excell to file systeem
         try {
             String workingDir = System.getProperty("user.dir") + "/excel/";
-            //FileOutputStream outputstream = new FileOutputStream(new File("D:/newExcelfile.xlsx"));
-            FileOutputStream outputstream = new FileOutputStream(new File(workingDir + "/newExcelfile.xlsx"));
-            wb.write(outputstream);
-            outputstream.close();
+            try (FileOutputStream outputstream = new FileOutputStream(new File(workingDir + "/newExcelfile.xlsx"))) {
+                wb.write(outputstream);
+            }
         } catch (FileNotFoundException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {

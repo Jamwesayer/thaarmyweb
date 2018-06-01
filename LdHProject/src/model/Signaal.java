@@ -31,6 +31,7 @@ public class Signaal {
     private String impactOrganisatie;
     private ConnectionString connection;
     
+    //Constructor
     public Signaal(String userID, int connectieString, String signaalType, String algemene_tekst, String variable_tekst, Date eersteOptreden, Date opgelost) {
         this.userID = userID;
         this.signaalType = signaalType;
@@ -41,6 +42,7 @@ public class Signaal {
         this.opgelost = opgelost;
     }
     
+    //Test Constructor
     public Signaal(String userID, int connectieString, String signaalType, String algemene_tekst, String variable_tekst, Date eersteOptreden) {
         this.userID = userID;
         this.signaalType = signaalType;        
@@ -50,6 +52,7 @@ public class Signaal {
         this.connectieString = connectieString;
     }    
     
+    //Method voor object testen.
     public void showSignaal() {
         Field[] fields = this.getClass().getDeclaredFields();
         Object variable = null;
@@ -78,11 +81,13 @@ public class Signaal {
         }
     }
 
+    //Method voor Signaal als Object
     public Object[] generateSignal() {
         return new Object[] { algemene_tekst, variable_tekst, connectieString 
                 ,eersteOptreden ,opgelost ,impactEntiteit ,impactOrganisatie };
     }
     
+    //Method om Signaal toetevoegen in tabel
     public boolean addToSignalTable(DefaultTableModel tableModel) {   
         tableModel.addRow(new Object[] {algemene_tekst,variable_tekst,connection.getConnectionString(),eersteOptreden,opgelost
                 ,impactEntiteit,impactOrganisatie});

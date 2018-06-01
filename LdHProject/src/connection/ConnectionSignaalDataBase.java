@@ -27,6 +27,7 @@ import model.Signaal;
  */
 public class ConnectionSignaalDataBase {
         
+        //Class Variable
         Connection conn;
         PreparedStatement prepStat;
         Database myDatabase;
@@ -36,11 +37,13 @@ public class ConnectionSignaalDataBase {
         String url;
         ArrayList<Signaal> signalenLijst;
         
+        //Constructor
         public ConnectionSignaalDataBase() throws ClassNotFoundException {
-            myDatabase = new Database();
             
+            myDatabase = new Database();
             driver = myDatabase.getDriver();
             url = myDatabase.getUrl();
+            
             Class.forName(driver);
             
             try {
@@ -54,18 +57,21 @@ public class ConnectionSignaalDataBase {
             } 
         }
         
+        //Methode voor het invoegen van signaal naar signaaldatabase
         public void insertSignal(String userId, String signaalType, String algemeen, int connectieString, String variable){
-            
             try{
+                //SQL Statement
                 String sql =  "use Test_Signaal_Database "
                             + "INSERT INTO SignalenTabel "
                             + "VALUES(?,?,?,?,?,?,NULL,NULL,NULL); ";
                 
+                //Init variables
                 Date date = new Date();
                 String lastCrawlDate = new SimpleDateFormat("yyyy-MM-dd").format(date);
                 Date utilDate = new SimpleDateFormat("yyyy-MM-dd").parse(lastCrawlDate); 
                 java.sql.Date sqlDate = new java.sql.Date(utilDate.getTime());                
                 
+                //Statements
                 prepStat = conn.prepareStatement(sql);
                 prepStat.setString(1, userId);
                 prepStat.setString(2, signaalType);
@@ -81,10 +87,12 @@ public class ConnectionSignaalDataBase {
             }
         }
         
+        //Methode voor het catchen van exceptions
         public static void infoBox(String infoMessage) {
             JOptionPane.showMessageDialog(null, infoMessage, "Foutmelding", JOptionPane.INFORMATION_MESSAGE);
         }
         
+        //Alle signalen van de signalen database tonen
         public ArrayList<Signaal> showSignalen(){
             try {
                 String sql = "use Test_Signaal_Database "
@@ -102,9 +110,8 @@ public class ConnectionSignaalDataBase {
                     int connectionString = rs.getInt("Connectie_String");
                     Date optreding = rs.getDate("Eerst_Optreding");
                     Date opgelost = rs.getDate("Opgelost");
-                    //Signaal signal = new Signaal(userId, connectionString, signaalType, algemeneTekst,variableTekst,optreding);
                     Signaal signal = new Signaal(userId, connectionString, signaalType, algemeneTekst,variableTekst,optreding,opgelost);
-                    
+
                     sql = "use Test_Signaal_Database SELECT * FROM ConnectionString WHERE ConnectionID = " + connectionString;
                     Statement stmts = conn.createStatement();
                     ResultSet rss = stmts.executeQuery(sql);
@@ -113,10 +120,10 @@ public class ConnectionSignaalDataBase {
                         String userConnectie = rss.getString("UserConnectie");
                         String databaseNaam = rss.getString("DatabaseNaam");
                         Timestamp timestamp = rss.getTimestamp("Timestamp");
-                        
+
                         signal.setConnection(new ConnectionString(servernaam, userConnectie, databaseNaam, timestamp));
                     }
-                    
+
                     signalenLijst.add(signal);
                 }
                 return signalenLijst;
@@ -127,5 +134,4 @@ public class ConnectionSignaalDataBase {
             }
         return signalenLijst;
     }
-        
 }

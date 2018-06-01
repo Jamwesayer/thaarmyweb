@@ -88,13 +88,13 @@ public class Main {
         lijst = mySignaalCalc.getSignalen();
         signalenLijst = new ArrayList<>();
         
+        //JList element
         list  = new JList(dlm);
         list.setName("SignaalList");
         list.setBackground(Color.WHITE);
         
+        //JScroll element
         scroller = new JScrollPane();  
-        
-        //#Plagiaat LOL
         scroller.setPreferredSize(new Dimension(350, 200));
         scroller.getViewport().add(list);
         scroller.getComponents();
@@ -160,9 +160,7 @@ public class Main {
         ActionListener action = (ActionEvent e) -> {
             try {
                 addSignalDataset();
-            } catch (SQLException ex) {
-                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (ClassNotFoundException ex) {
+            } catch (SQLException | ClassNotFoundException ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
         };
@@ -170,7 +168,6 @@ public class Main {
     }
     
     private static ActionListener showSignalenAction() {
-          
         ActionListener action = (ActionEvent e) -> {
             showSignalen();
         };
@@ -197,70 +194,71 @@ public class Main {
         return action;
     }
     
-    //Methods for listener
+    //---Methods for listener---
     private static void showSignalen(){
         
-            DefaultListModel<String> dlm = new DefaultListModel<String>();
-            for(Signaal signaal : lijst){
-                dlm.addElement(signaal.getAlgemene_tekst());
-            }
-            list  = new JList(dlm);
-            list.setBackground(Color.WHITE);
-            scroller.getViewport().add(list);        
+        DefaultListModel<String> dlm = new DefaultListModel<String>();
+        for(Signaal signaal : lijst){
+            dlm.addElement(signaal.getAlgemene_tekst());
+        }
+        list  = new JList(dlm);
+        list.setBackground(Color.WHITE);
+        scroller.getViewport().add(list);        
     }
     
+    //Signalen naar tabel schrijven
     private static void addSignalDataset() throws SQLException, ClassNotFoundException{
         
-            Signaal signaal =  lijst.get(list.getSelectedIndex());
-            
-            if(!mySignaalCalc.checkDuplicate(signaal.getUserID(),signalenLijst)) {
-                ConnectionStringDataBase CSDB = new ConnectionStringDataBase();
-                int lastId = CSDB.insertConnectionString(mySignaalCalc.getCS());
-                signaal.setConnectieString(lastId);
-                setConnectionForSignal(signaal);
-                signalenLijst.add(signaal);
-                signaal.addToSignalTable(table_model);
-                try {
-                    addSignalToSignalDB();
-                } catch (SQLException ex) {
-                    System.out.println(ex);
-                } catch (ParseException ex) {
-                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-                }                
-            }
-            else {
-                System.out.println("--- DUPLICATE ---");
-            }
+        Signaal signaal =  lijst.get(list.getSelectedIndex());
+
+        if(!mySignaalCalc.checkDuplicate(signaal.getUserID(),signalenLijst)) {
+            ConnectionStringDataBase CSDB = new ConnectionStringDataBase();
+            int lastId = CSDB.insertConnectionString(mySignaalCalc.getCS());
+            signaal.setConnectieString(lastId);
+            setConnectionForSignal(signaal);
+            signalenLijst.add(signaal);
+            signaal.addToSignalTable(table_model);
+            try {
+                addSignalToSignalDB();
+            } catch (SQLException ex) {
+                System.out.println(ex);
+            } catch (ParseException ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            }                
+        }
+        else {
+            System.out.println("--- DUPLICATE ---");
+        }
     }
     
+    //Signalen naar Database schrijven
     private static void addSignalToSignalDB() throws SQLException, ParseException {
         Signaal signaal = lijst.get(list.getSelectedIndex());
         signalDB.insertSignal(signaal.getUserID(), signaal.getSignaalType(), signaal.getAlgemene_tekst(), signaal.getConnectieString(), signaal.getVariable_tekst());
     }
     
+    //Database signalen tonen
     private static void showSignalenDB() throws SQLException {
+        //Signalen van Signaal Database
         ArrayList<Signaal> requiredList = signalDB.showSignalen();
-        
+        //Check voor duplicatie
         boolean in = false;
         for(Signaal signaal : requiredList) {
-            int count = 0;
             for(Signaal signaal2 : lijst) {
-                count++;
                 if(signaal.getUserID() == null ? signaal2.getUserID() == null : signaal.getUserID().replaceAll("\\s+","").equals(signaal2.getUserID())){
+                    //Er bestaat duplicatie
                     in = true;
-                    Font font = new Font("Courier", Font.BOLD,12);
-                    String txt = ((String)list.getModel().getElementAt(count));
-
                 }
             }
             if(in){
+                //Reset
                 in = false;
             }
             else {
                 Date date = new Date();
                 signaal.setOpgelost(date);
             }
-        }        
+        }
         
         for(Signaal signaal : requiredList) {
             if(!mySignaalCalc.checkDuplicate(signaal.getUserID(),signalenLijst)) {
@@ -270,6 +268,7 @@ public class Main {
         }
     }
     
+    //Object signaal variable connectionstring vullen voor tabel
     public static Signaal setConnectionForSignal(Signaal signal) throws SQLException {        
         Connection con = DriverManager.getConnection(myDatabase.getUrl());
         String sql = "use Test_Signaal_Database SELECT * FROM ConnectionString WHERE ConnectionID = " + signal.getConnectieString();
@@ -283,6 +282,7 @@ public class Main {
             Timestamp timestamp = rss.getTimestamp("Timestamp");
             signal.setConnection(new ConnectionString(servernaam, userConnectie, databaseNaam, timestamp));
         }    
+        
         return signal;
     }    
     

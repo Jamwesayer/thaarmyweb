@@ -13,11 +13,13 @@ public class Database {
     private final String driver;
     private final String url;
     
+    //Constructor
     public Database() {
         driver = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
         url = "jdbc:sqlserver://localhost;integratedSecurity=true";        
     }
     
+    //Getter en Setter
     public String getDriver() {
         return driver;
     }
