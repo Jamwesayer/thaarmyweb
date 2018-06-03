@@ -27,11 +27,15 @@ public class RechterPanel extends JPanel {
     private JScrollPane scroller;
     private DefaultListModel model;
     private JTextArea tekstLog;
+    
     private JScrollPane scrollTekst;
+    
     private JPanel businessRulePanel;
     private JPanel afwijkingPanel;
+    
     private final GridLayout STANDAARD;
     private GridBagConstraints gc;
+    
 
     public RechterPanel(ConnectionDataBase db)
     {

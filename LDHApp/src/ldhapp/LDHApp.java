@@ -7,6 +7,7 @@ package ldhapp;
 
 import javax.swing.JFrame;
 
+
 /**
  *
  * @author mucis
@@ -19,13 +20,13 @@ public class LDHApp {
         // TODO code application logic here
         //JFrame setting
         ConnectionDataBase db = new ConnectionDataBase();
+        
+        //LoginFrame loginFrame = new LoginFrame(db);
         JFrame AppFrame = new MainFrame("Signalen applicatie",db);
         AppFrame.setSize(1900,1000);
         AppFrame.setResizable(true);
         AppFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        
-        
-        //Run JFrame
+
         AppFrame.setVisible(true);
     }
 }

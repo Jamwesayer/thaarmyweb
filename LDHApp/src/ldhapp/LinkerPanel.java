@@ -22,12 +22,13 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
+import javax.swing.Timer;
 
 /**
  *
  * @author mucis
  */
-public class LinkerPanel extends JPanel{
+public class LinkerPanel extends JPanel implements ActionListener {
     //start algemeen
     private final ConnectionDataBase DB;
     private final GridLayout STANDAARD;
@@ -53,7 +54,8 @@ public class LinkerPanel extends JPanel{
     
     //////////start gegevens
     private JPanel gegevensPanel;
-    private JTextArea gegevensLabel;
+    private JTextArea gegevensArea;
+    private JTextArea liveTime;
     ////////// end gegevens
     
     
@@ -75,8 +77,7 @@ public class LinkerPanel extends JPanel{
 
         //algemeen gegevens
         setInfoPanel();
-        addInfoPanel();
-
+        
         add(buttonPanel);
         add(logPanel);
         add(gegevensPanel);
@@ -104,7 +105,7 @@ public class LinkerPanel extends JPanel{
         DBInlezenBtn = new JButton("Database inlezen");
         datasetExporterenBtn = new JButton("Dataset exporteren");
         //filter klaarzetten
-        String[] filterStrings = { "Alleen actueel", "Alleen Opgelost", "Alles" };
+        String[] filterStrings = { "Alleen actueel", "Alleen Opgelost", "Alles"};
         filterlijst = new JComboBox(filterStrings);
         //String van filterlijst op center zetten.
         ((JLabel)filterlijst.getRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
@@ -244,18 +245,45 @@ public class LinkerPanel extends JPanel{
     //////start methode gegevens
     public void setInfoPanel()
     {
+        Timer t = new Timer(1000, this);
+        t.start();
+        
         gegevensPanel = new JPanel();
-        gegevensPanel.setLayout(STANDAARD);
-        gegevensLabel = new JTextArea();
+        gegevensPanel.setLayout(new GridBagLayout());
+        gc = new GridBagConstraints();
+        gc.anchor = GridBagConstraints.NORTHWEST;
+        gc.weightx = 0.1;
+        gc.weighty = 0.1;
 
-        //paneel dimension
+        gc.gridx = 0;
+        gc.gridy = 0;
+        gc.fill = gc.HORIZONTAL;
+        
+        liveTime = new JTextArea();
+        liveTime.setEditable(false);
+        liveTime.setLineWrap(true);
+        
+        gegevensPanel.add(liveTime,gc);
+        
+        gegevensArea = new JTextArea();
+        gegevensArea.setEditable(false);
+        gegevensArea.setLineWrap(true);
+        gegevensArea.append(DB.systeemGegevens());
+        
+        gc.gridx = 0;
+        gc.gridy = 1;
+        gc.weighty = 10;
+        gc.fill = gc.BOTH;
+        
+        gegevensPanel.add(gegevensArea,gc);
         gegevensPanel.setPreferredSize(new Dimension(100, 350));
         gegevensPanel.setBorder(BorderFactory.createTitledBorder("Systeem gegevens"));
     }
     
-    public void addInfoPanel()
-    {
-        gegevensPanel.add(gegevensLabel);        
-    }
+    public void actionPerformed(ActionEvent ae) {
+        Date d = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("hh:mm:ss");
+        liveTime.setText("Tijd: "+ sdf.format(d));
+  }
     //////end methode gegevens
 }

@@ -7,7 +7,6 @@ package ldhproject;
 
 import connection.ConnectionSignaalDataBase;
 import connection.ConnectionStringDataBase;
-import excelExport.excelExportHandler;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -55,13 +54,11 @@ public class Main {
     private static DefaultTableModel table_model;
     private static JScrollPane scroller;
     private static ConnectionSignaalDataBase signalDB;
-    private static excelExportHandler myExport;
     private static SignaalCalc mySignaalCalc;
     
     public static void main(String[] args) throws ClassNotFoundException, SQLException, ParseException {
         
         signalDB = new ConnectionSignaalDataBase();
-        myExport = new excelExportHandler(table_model);
         
         frame.setMinimumSize(new Dimension(WIDTH, HEIGHT));
         frame.setPreferredSize(new Dimension(WIDTH, HEIGHT));
@@ -139,7 +136,6 @@ public class Main {
         knop1.addActionListener(showSignalenAction());
         knop2.addActionListener(showSignalenDBAction());
         knop3.addActionListener(getAddSignalDatasetAction()); 
-        exportKnop.addActionListener(writeToExcelAction());
         
         showSignalen();
         showSignalenDB();
@@ -180,13 +176,6 @@ public class Main {
         return action;
     }
     
-    private static ActionListener writeToExcelAction() {
-        ActionListener action = (ActionEvent e) -> {
-            myExport = new excelExportHandler(table_model);
-            myExport.writeToExcel();
-        };
-        return action;
-    }    
     
     //Methods for listener
     private static void showSignalen(){
