@@ -5,6 +5,7 @@
  */
 package connection;
 
+import Database.Database;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -26,17 +27,23 @@ import model.Signaal;
  */
 public class ConnectionSignaalDataBase {
         
+        //Class Variable
         Connection conn;
-        PreparedStatement prepStat;    
-        String driver;
-        String url;
+        PreparedStatement prepStat;
+        Database myDatabase;
         String user;
         String pass;
+        String driver;
+        String url;
         ArrayList<Signaal> signalenLijst;
         
+        //Constructor
         public ConnectionSignaalDataBase() throws ClassNotFoundException {
-            driver = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
-            url = "jdbc:sqlserver://localhost;integratedSecurity=true";
+            
+            myDatabase = new Database();
+            driver = myDatabase.getDriver();
+            url = myDatabase.getUrl();
+            
             Class.forName(driver);
             
             try {
@@ -50,16 +57,21 @@ public class ConnectionSignaalDataBase {
             } 
         }
         
-        public void insertSignal(String sql_query, String userId, String signaalType, String algemeen, int connectieString, String variable){
-            
+        //Methode voor het invoegen van signaal naar signaaldatabase
+        public void insertSignal(String userId, String signaalType, String algemeen, int connectieString, String variable){
             try{
-                String sql = sql_query;
+                //SQL Statement
+                String sql =  "use Test_Signaal_Database "
+                            + "INSERT INTO SignalenTabel "
+                            + "VALUES(?,?,?,?,?,?,NULL,NULL,NULL); ";
                 
+                //Init variables
                 Date date = new Date();
                 String lastCrawlDate = new SimpleDateFormat("yyyy-MM-dd").format(date);
                 Date utilDate = new SimpleDateFormat("yyyy-MM-dd").parse(lastCrawlDate); 
                 java.sql.Date sqlDate = new java.sql.Date(utilDate.getTime());                
                 
+                //Statements
                 prepStat = conn.prepareStatement(sql);
                 prepStat.setString(1, userId);
                 prepStat.setString(2, signaalType);
@@ -71,18 +83,20 @@ public class ConnectionSignaalDataBase {
             }
             
             catch(SQLException | ParseException e) {
-                //infoBox(e.toString());
-                System.out.println(e);
+                infoBox(e.toString());
             }
         }
         
+        //Methode voor het catchen van exceptions
         public static void infoBox(String infoMessage) {
             JOptionPane.showMessageDialog(null, infoMessage, "Foutmelding", JOptionPane.INFORMATION_MESSAGE);
         }
         
-        public ArrayList<Signaal> showSignalen(String sql_query){
+        //Alle signalen van de signalen database tonen
+        public ArrayList<Signaal> showSignalen(){
             try {
-                String sql = sql_query;
+                String sql = "use Test_Signaal_Database "
+                           + " SELECT * FROM SignalenTabel";
 
                 Statement stmt = conn.createStatement();
                 ResultSet rs = stmt.executeQuery(sql);
@@ -94,9 +108,10 @@ public class ConnectionSignaalDataBase {
                     String algemeneTekst = rs.getString("Algemene_Tekst");
                     String variableTekst = rs.getString("Variable_Tekst");
                     int connectionString = rs.getInt("Connectie_String");
-                    Date opgelost = rs.getDate("Eerst_Optreding");
-                    Signaal signal = new Signaal(userId, connectionString, signaalType, algemeneTekst,variableTekst,opgelost);
-                    
+                    Date optreding = rs.getDate("Eerst_Optreding");
+                    Date opgelost = rs.getDate("Opgelost");
+                    Signaal signal = new Signaal(userId, connectionString, signaalType, algemeneTekst,variableTekst,optreding,opgelost);
+
                     sql = "use Test_Signaal_Database SELECT * FROM ConnectionString WHERE ConnectionID = " + connectionString;
                     Statement stmts = conn.createStatement();
                     ResultSet rss = stmts.executeQuery(sql);
@@ -105,10 +120,10 @@ public class ConnectionSignaalDataBase {
                         String userConnectie = rss.getString("UserConnectie");
                         String databaseNaam = rss.getString("DatabaseNaam");
                         Timestamp timestamp = rss.getTimestamp("Timestamp");
-                        
+
                         signal.setConnection(new ConnectionString(servernaam, userConnectie, databaseNaam, timestamp));
                     }
-                    
+
                     signalenLijst.add(signal);
                 }
                 return signalenLijst;

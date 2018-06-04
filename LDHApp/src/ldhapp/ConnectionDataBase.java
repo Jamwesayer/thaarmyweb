@@ -24,7 +24,7 @@ public class ConnectionDataBase {
         Connection conn;
         PreparedStatement prepStat; 
         ResultSet rs;
-        String driver;
+        String driver = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
         String url = "jdbc:sqlserver://localhost;databaseName=Test_Signaal_Database;integratedSecurity=true";
         
         //user gegevens
@@ -35,9 +35,12 @@ public class ConnectionDataBase {
         String user;
         String pass;
         */
-        public String getURLDB()
-        {
+        public String getURLDB() {
             return url;
+        }
+        
+        public String getDriver(){
+            return driver;
         }
         
         public boolean SelectSignalen()

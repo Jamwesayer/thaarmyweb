@@ -93,7 +93,7 @@ public class LinkerPanel extends JPanel implements ActionListener {
     public void setButtonPanel()
     {
         buttonPanel = new JPanel();
-        buttonPanel.setBorder(BorderFactory.createTitledBorder("Activiteiten"));
+        buttonPanel.setBorder(BorderFactory.createTitledBorder("Activiteiten knop"));
 
         afwijkingStartenBtn = new JButton("Afwijkingen starten");
         afwijkingTestenBtn = new JButton("<html>Afwijkingen <font color='red'>testen</font></html>");

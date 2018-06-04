@@ -31,7 +31,8 @@ public class Signaal {
     private String impactOrganisatie;
     private ConnectionString connection;
     
-    public Signaal(String userID, String signaalType, String algemene_tekst, String variable_tekst, int connectieString, Date eersteOptreden, Date opgelost) {
+    //Constructor
+    public Signaal(String userID, int connectieString, String signaalType, String algemene_tekst, String variable_tekst, Date eersteOptreden, Date opgelost) {
         this.userID = userID;
         this.signaalType = signaalType;
         this.algemene_tekst = algemene_tekst;
@@ -41,14 +42,7 @@ public class Signaal {
         this.opgelost = opgelost;
     }
     
-    public Signaal(String userID, String signaalType, String algemene_tekst, String variable_tekst, Date eersteOptreden) {
-        this.userID = userID;
-        this.signaalType = signaalType;        
-        this.algemene_tekst = algemene_tekst;
-        this.variable_tekst = variable_tekst;
-        this.eersteOptreden = eersteOptreden;
-    }
-    
+    //Test Constructor
     public Signaal(String userID, int connectieString, String signaalType, String algemene_tekst, String variable_tekst, Date eersteOptreden) {
         this.userID = userID;
         this.signaalType = signaalType;        
@@ -58,18 +52,7 @@ public class Signaal {
         this.connectieString = connectieString;
     }    
     
-    public void setConnection(ConnectionString connection) {
-        this.connection = connection;
-    }
-    
-    public ConnectionString getConnection() {
-        return connection;
-    }
-    
-    public String getConnectionText() {
-        return connection.getConnectionString();
-    }
-    
+    //Method voor object testen.
     public void showSignaal() {
         Field[] fields = this.getClass().getDeclaredFields();
         Object variable = null;
@@ -98,11 +81,13 @@ public class Signaal {
         }
     }
 
+    //Method voor Signaal als Object
     public Object[] generateSignal() {
         return new Object[] { algemene_tekst, variable_tekst, connectieString 
                 ,eersteOptreden ,opgelost ,impactEntiteit ,impactOrganisatie };
     }
     
+    //Method om Signaal toetevoegen in tabel
     public boolean addToSignalTable(DefaultTableModel tableModel) {   
         tableModel.addRow(new Object[] {algemene_tekst,variable_tekst,connection.getConnectionString(),eersteOptreden,opgelost
                 ,impactEntiteit,impactOrganisatie});
@@ -110,6 +95,18 @@ public class Signaal {
     }
     
     //Getter and Setters
+    public void setConnection(ConnectionString connection) {
+        this.connection = connection;
+    }
+    
+    public ConnectionString getConnection() {
+        return connection;
+    }
+    
+    public String getConnectionText() {
+        return connection.getConnectionString();
+    }    
+    
     public int getSignaalID() {
         return signaalID;
     }
@@ -132,7 +129,7 @@ public class Signaal {
 
     public void setSignaalType(String signaalType) {
         this.signaalType = signaalType;
-    }    
+    }
     
     public String getAlgemene_tekst() {
         return algemene_tekst;

@@ -10,12 +10,19 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.sql.SQLException;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import model.Signaal;
+import model.SignaalLijst;
 
 /**
  *
@@ -37,43 +44,54 @@ public class RechterPanel extends JPanel {
     private GridBagConstraints gc;
     
 
-    public RechterPanel(ConnectionDataBase db)
+    public RechterPanel(ConnectionDataBase db, SignaalLijst signaalLijst)
     {
         setLayout(new GridBagLayout()); // aantalRij, aantalKolom,VerticaalGap,HorizontaalGap
         STANDAARD = new GridLayout();
         setPreferredSize(new Dimension(355,0));
         setBorder(BorderFactory.createTitledBorder("Gevonden afwijkingen"));
 
-        setPanel();
+        setPanel(signaalLijst);
         addPanel();
         //afwijkingLijst = new AfwijkingLijst();
         //add(afwijkingLijst);
     }
     
-    public void setPanel()
+    public void setPanel(SignaalLijst signaalLijst)
     {
-        model = new DefaultListModel();
-        
-        for (int i = 0; i < 15; i++)
-        {
-            model.addElement("Element " + i);
-        }
-        
-        jList = new JList(model);
-        scroller = new JScrollPane(jList);
-        jList.setBackground(Color.WHITE);
-        afwijkingPanel = new JPanel();
-        afwijkingPanel.setLayout(STANDAARD);
-        afwijkingPanel.add(scroller);
-        afwijkingPanel.setBorder(BorderFactory.createTitledBorder("Alle gevonden afwijkingen"));
-        
-        tekstLog = new JTextArea(10,12);
-        tekstLog.setEditable(false);
-        scrollTekst = new JScrollPane(tekstLog,  JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-        businessRulePanel = new JPanel();
-        businessRulePanel.setLayout(STANDAARD);
-        businessRulePanel.add(scrollTekst);
-        businessRulePanel.setBorder(BorderFactory.createTitledBorder("Aantal Afwijkingen per Business Rules"));
+        //try {
+            model = new DefaultListModel();
+            
+            SignaalLijst mySignaalLijst = signaalLijst;
+            ArrayList<Signaal> list = mySignaalLijst.getSignalen();
+            
+            for(Signaal signaal : list){
+                model.addElement(signaal.getAlgemene_tekst());
+            }
+            
+            jList = new JList(model);
+            scroller = new JScrollPane(jList);
+            jList.setBackground(Color.WHITE);
+            afwijkingPanel = new JPanel();
+            afwijkingPanel.setLayout(STANDAARD);
+            afwijkingPanel.add(scroller);
+            afwijkingPanel.setBorder(BorderFactory.createTitledBorder("Alle gevonden afwijkingen"));
+            afwijkingPanel.setMaximumSize( new Dimension(
+                Integer.MAX_VALUE,
+                200)
+            );
+            
+            tekstLog = new JTextArea(100,12);
+            tekstLog.setEditable(false);
+            scrollTekst = new JScrollPane(tekstLog,  JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+            businessRulePanel = new JPanel();
+            businessRulePanel.setLayout(STANDAARD);
+            businessRulePanel.add(scrollTekst);
+            businessRulePanel.setBorder(BorderFactory.createTitledBorder("Aantal Afwijkingen per Business Rules"));
+            
+        /*} catch (ClassNotFoundException | ParseException | SQLException ex) {
+            Logger.getLogger(RechterPanel.class.getName()).log(Level.SEVERE, null, ex);
+        }*/
     }
 
     public void addPanel()

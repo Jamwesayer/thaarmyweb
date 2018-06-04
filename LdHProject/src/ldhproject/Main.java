@@ -5,11 +5,15 @@
  */
 package ldhproject;
 
+import model.SignaalLijst;
+import Database.Database;
 import connection.ConnectionSignaalDataBase;
 import connection.ConnectionStringDataBase;
+import excelExport.excelExportHandler;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Connection;
@@ -20,6 +24,7 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.BoxLayout;
@@ -54,11 +59,15 @@ public class Main {
     private static DefaultTableModel table_model;
     private static JScrollPane scroller;
     private static ConnectionSignaalDataBase signalDB;
-    private static SignaalCalc mySignaalCalc;
+    private static excelExportHandler myExport;
+    private static SignaalLijst mySignaalCalc;
+    private static Database myDatabase;
     
     public static void main(String[] args) throws ClassNotFoundException, SQLException, ParseException {
         
         signalDB = new ConnectionSignaalDataBase();
+        myExport = new excelExportHandler(table_model);
+        myDatabase = new Database();
         
         frame.setMinimumSize(new Dimension(WIDTH, HEIGHT));
         frame.setPreferredSize(new Dimension(WIDTH, HEIGHT));
@@ -75,17 +84,17 @@ public class Main {
         DefaultListModel<String> dlm = new DefaultListModel<String>();
         
         //Signalen
-        mySignaalCalc = new SignaalCalc();
+        mySignaalCalc = new SignaalLijst();
         lijst = mySignaalCalc.getSignalen();
         signalenLijst = new ArrayList<>();
         
+        //JList element
         list  = new JList(dlm);
         list.setName("SignaalList");
         list.setBackground(Color.WHITE);
         
+        //JScroll element
         scroller = new JScrollPane();  
-        
-        //#Plagiaat LOL
         scroller.setPreferredSize(new Dimension(350, 200));
         scroller.getViewport().add(list);
         scroller.getComponents();
@@ -117,6 +126,7 @@ public class Main {
         JButton exportKnop = new JButton("export to excel");
         JButton uitloggen = new JButton("Log out");
         
+        //Add buttons to container
         buttonCtr.add(knop1);
         buttonCtr.add(knop2);
         buttonCtr.add(knop3);
@@ -129,13 +139,16 @@ public class Main {
         container.putClientProperty("SignaalList", list);
         container.add(buttonCtr, BorderLayout.WEST);
         
+        //Frame settings
         frame.add(container);
         frame.pack();
         frame.setVisible(true);
         
+        //initActionListener
         knop1.addActionListener(showSignalenAction());
         knop2.addActionListener(showSignalenDBAction());
         knop3.addActionListener(getAddSignalDatasetAction()); 
+        exportKnop.addActionListener(writeToExcelAction());
         
         showSignalen();
         showSignalenDB();
@@ -147,9 +160,7 @@ public class Main {
         ActionListener action = (ActionEvent e) -> {
             try {
                 addSignalDataset();
-            } catch (SQLException ex) {
-                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (ClassNotFoundException ex) {
+            } catch (SQLException | ClassNotFoundException ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
         };
@@ -157,7 +168,6 @@ public class Main {
     }
     
     private static ActionListener showSignalenAction() {
-          
         ActionListener action = (ActionEvent e) -> {
             showSignalen();
         };
@@ -176,82 +186,103 @@ public class Main {
         return action;
     }
     
+    private static ActionListener writeToExcelAction() {
+        ActionListener action = (ActionEvent e) -> {
+            myExport = new excelExportHandler(table_model);
+            myExport.writeToExcel();
+        };
+        return action;
+    }
     
-    //Methods for listener
+    //---Methods for listener---
     private static void showSignalen(){
         
-            DefaultListModel<String> dlm = new DefaultListModel<String>();
-            for(Signaal signaal : lijst){
-                dlm.addElement(signaal.getAlgemene_tekst());
-            }
-            list  = new JList(dlm);
-            list.setBackground(Color.WHITE);
-            scroller.getViewport().add(list);        
+        DefaultListModel<String> dlm = new DefaultListModel<String>();
+        for(Signaal signaal : lijst){
+            dlm.addElement(signaal.getAlgemene_tekst());
+        }
+        list  = new JList(dlm);
+        list.setBackground(Color.WHITE);
+        scroller.getViewport().add(list);        
     }
     
+    //Signalen naar tabel schrijven
     private static void addSignalDataset() throws SQLException, ClassNotFoundException{
         
-            Signaal signaal =  lijst.get(list.getSelectedIndex());
-            if(!mySignaalCalc.checkDuplicate(signaal.getUserID(),signalenLijst)) {
-                ConnectionStringDataBase CSDB = new ConnectionStringDataBase();
-                int lastId = CSDB.insertConnectionString(mySignaalCalc.getCS());
-                signaal.setConnectieString(lastId);
-                setConnectionForSignal(signaal);
-                signalenLijst.add(signaal);
-                signaal.addToSignalTable(table_model);
-                try {
-                    addSignalToSignalDB();
-                } catch (SQLException ex) {
-                    System.out.println(ex);
-                } catch (ParseException ex) {
-                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-                }                
+        Signaal signaal =  lijst.get(list.getSelectedIndex());
+
+        if(!mySignaalCalc.checkDuplicate(signaal.getUserID(),signalenLijst)) {
+            ConnectionStringDataBase CSDB = new ConnectionStringDataBase();
+            int lastId = CSDB.insertConnectionString(mySignaalCalc.getCS());
+            signaal.setConnectieString(lastId);
+            setConnectionForSignal(signaal);
+            signalenLijst.add(signaal);
+            signaal.addToSignalTable(table_model);
+            try {
+                addSignalToSignalDB();
+            } catch (SQLException ex) {
+                System.out.println(ex);
+            } catch (ParseException ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            }                
+        }
+        else {
+            System.out.println("--- DUPLICATE ---");
+        }
+    }
+    
+    //Signalen naar Database schrijven
+    private static void addSignalToSignalDB() throws SQLException, ParseException {
+        Signaal signaal = lijst.get(list.getSelectedIndex());
+        signalDB.insertSignal(signaal.getUserID(), signaal.getSignaalType(), signaal.getAlgemene_tekst(), signaal.getConnectieString(), signaal.getVariable_tekst());
+    }
+    
+    //Database signalen tonen
+    private static void showSignalenDB() throws SQLException {
+        //Signalen van Signaal Database
+        ArrayList<Signaal> requiredList = signalDB.showSignalen();
+        //Check voor duplicatie
+        boolean in = false;
+        for(Signaal signaal : requiredList) {
+            for(Signaal signaal2 : lijst) {
+                if(signaal.getUserID() == null ? signaal2.getUserID() == null : signaal.getUserID().replaceAll("\\s+","").equals(signaal2.getUserID())){
+                    //Er bestaat duplicatie
+                    in = true;
+                }
+            }
+            if(in){
+                //Reset
+                in = false;
             }
             else {
-                System.out.println("--- DUPLICATE ---");
+                Date date = new Date();
+                signaal.setOpgelost(date);
             }
-    }
-    
-    private static void addSignalToSignalDB() throws SQLException, ParseException {
-        String sql = "use Test_Signaal_Database "
-                + "INSERT INTO SignalenTabel "
-                + "VALUES(?,?,?,?,?,?,NULL,NULL,NULL);";
-        Signaal signaal = lijst.get(list.getSelectedIndex());
-        signalDB.insertSignal(sql, signaal.getUserID(), signaal.getSignaalType(), signaal.getAlgemene_tekst(), signaal.getConnectieString(), signaal.getVariable_tekst());
-    }
-    
-    private static void getLatestConnectionString() {
-        String sql = "use Test_Signaal_Database";
-    }
-    
-    private static void showSignalenDB() throws SQLException {
-        String sql = "use Test_Signaal_Database "
-                + " SELECT * FROM SignalenTabel";
-        ArrayList<Signaal> requiredList = signalDB.showSignalen(sql);
+        }
+        
         for(Signaal signaal : requiredList) {
             if(!mySignaalCalc.checkDuplicate(signaal.getUserID(),signalenLijst)) {
                 signalenLijst.add(signaal);
-                signaal.showSignaal();
                 signaal.addToSignalTable(table_model);
             }
         }
     }
     
+    //Object signaal variable connectionstring vullen voor tabel
     public static Signaal setConnectionForSignal(Signaal signal) throws SQLException {        
-        String url = "jdbc:sqlserver://localhost;integratedSecurity=true";
-        Connection con = DriverManager.getConnection(url);
+        Connection con = DriverManager.getConnection(myDatabase.getUrl());
         String sql = "use Test_Signaal_Database SELECT * FROM ConnectionString WHERE ConnectionID = " + signal.getConnectieString();
         Statement stmts = con.createStatement();
         ResultSet rss = stmts.executeQuery(sql);
         
         while(rss.next()) {
-            
             String servernaam = rss.getString("ServerNaam");
             String userConnectie = rss.getString("UserConnectie");
             String databaseNaam = rss.getString("DatabaseNaam");
             Timestamp timestamp = rss.getTimestamp("Timestamp");
             signal.setConnection(new ConnectionString(servernaam, userConnectie, databaseNaam, timestamp));
         }    
+        
         return signal;
     }    
     

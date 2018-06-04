@@ -12,6 +12,7 @@ import java.sql.Timestamp;
  * @author J_Administrator
  */
 public class ConnectionString {
+    
     //Class Variable
     private int connectionID;
     private String serverNaam;
@@ -19,10 +20,7 @@ public class ConnectionString {
     private String databaseName;
     private Timestamp timestamp;
     
-    //Method Variable
-    private String driver;
-    private String url;
-    
+    //Constructor
     public ConnectionString(int connectionID, String serverNaam, String userConnectie, String databaseName, Timestamp timestamp) {
         this.connectionID = connectionID;
         this.serverNaam = serverNaam;
@@ -31,6 +29,7 @@ public class ConnectionString {
         this.timestamp = timestamp;
     }
     
+    //Test Constructor
     public ConnectionString(String serverNaam, String userConnectie, String databaseName, Timestamp timestamp) {
         this.serverNaam = serverNaam;
         this.userConnectie = userConnectie;
@@ -38,7 +37,10 @@ public class ConnectionString {
         this.timestamp = timestamp;
     }    
 
+    //Getter en Setter
     public String getConnectionString() {
+        
+        //replaceAll wegens nchar database type
         String hi = databaseName + "/" + serverNaam + ", " + userConnectie + ", " + timestamp;
         return hi.replaceAll("\\s+","");
     }
