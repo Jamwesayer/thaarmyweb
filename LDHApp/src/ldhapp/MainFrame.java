@@ -55,6 +55,7 @@ public class MainFrame extends JFrame  implements ActionListener{
     private JButton  afwijkingWegschrijvenBtn;
     private JButton  impactStartBtn;
     private JButton  DBInlezenBtn;
+    private JButton  uitlogBtn;
     private JButton  datasetExporterenBtn;
     /////////////end functieknoppen
     
@@ -146,6 +147,7 @@ public class MainFrame extends JFrame  implements ActionListener{
     
     public void setButtonPanel()
     {
+        //knoppen declareren
         buttonPanel = new JPanel();
         buttonPanel.setBorder(BorderFactory.createTitledBorder("Activiteiten"));
 
@@ -153,9 +155,10 @@ public class MainFrame extends JFrame  implements ActionListener{
         afwijkingWegschrijvenBtn = new JButton("<html>Afwijkingen<br /> wegschrijven</html>");
 
         impactStartBtn = new JButton("Impacten starten");
-
-        //knoppen declareren
+        
         DBInlezenBtn = new JButton("Database inlezen");
+        
+        uitlogBtn = new JButton("<html><font color=red>Uitloggen</font>");
         datasetExporterenBtn = new JButton("Dataset exporteren");
         //filter klaarzetten
         String[] filterStrings = { "Alleen actueel", "Alleen Opgelost", "Alles"};
@@ -199,7 +202,11 @@ public class MainFrame extends JFrame  implements ActionListener{
             gc.gridy = 4;
             buttonPanel.add(afwijkingWegschrijvenBtn,gc);
         }
-        
+       
+        gc.gridx = 0;
+        gc.gridy = 5;
+        buttonPanel.add(uitlogBtn,gc);
+        repaintPanel();  
         datasetExporterenBtn.addActionListener(new ActionListener()
         {
           public void actionPerformed(ActionEvent e)
@@ -319,16 +326,16 @@ public class MainFrame extends JFrame  implements ActionListener{
         middelpuntPanel.setLayout(new GridLayout(3,1,1,1)); // aantalRij, aantalKolom,VerticaalGap,HorizontaalGap
         middelpuntPanel.setPreferredSize(new Dimension(355,0));
         sTabelPanel = new JPanel();
-        
+        setSTablePanel(sTabelPanel);
         middelpuntPanel.add(sTabelPanel);
         //middelpuntPanel.add(pTabelPanel);
         //middelpuntPanel.add(iTabelPanel);
     }
     
     
-    public void setSTablePanel()
+    public void setSTablePanel(JPanel sTabelPanel)
     {
-        sTabelPanel = new JPanel();
+        
         sTabelPanel.setLayout(STANDAARD);
         sTabelPanel.setBorder(BorderFactory.createTitledBorder("Activiteiten"));
         
