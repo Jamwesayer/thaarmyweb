@@ -14,9 +14,13 @@ import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.SQLException;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -31,6 +35,7 @@ import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 import javax.swing.Timer;
 import javax.swing.table.DefaultTableModel;
+import model.SignaalLijst;
 
 /**
  *
@@ -364,11 +369,6 @@ public class MainFrame extends JFrame  implements ActionListener{
     {
         model = new DefaultListModel();
         
-        for (int i = 0; i < 15; i++)
-        {
-            model.addElement("Element " + i);
-        }
-        
         jList = new JList(model);
         scroller = new JScrollPane(jList);
         jList.setBackground(Color.WHITE);
@@ -384,6 +384,22 @@ public class MainFrame extends JFrame  implements ActionListener{
         businessRulePanel.setLayout(STANDAARD);
         businessRulePanel.add(scrollTekst);
         businessRulePanel.setBorder(BorderFactory.createTitledBorder("Aantal Afwijkingen per Business Rules"));
+        String BRPText = "";
+        SignaalLijst lijst = null;
+        try {
+            lijst = new SignaalLijst();
+        } catch (ClassNotFoundException | ParseException | SQLException ex) {
+            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        int[] afwijkingen = lijst.getCount();
+        String[] afwijkingenText = {"Vergelijk Profit met AD ","Vergelijk Clever met de AD ", "Vergelijk Profit met Clever "};
+        int count = 0;
+        for(String string : afwijkingenText){
+            BRPText += string + afwijkingen[count] + "Gevonden. \n";
+            count++;
+        }
+        afwijkAantal.setText(BRPText);
+        System.out.println(BRPText);
     }
 
     public void addBothList()

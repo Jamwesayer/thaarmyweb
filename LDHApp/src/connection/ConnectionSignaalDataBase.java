@@ -5,7 +5,7 @@
  */
 package connection;
 
-import Database.Database;
+import ldhapp.ConnectionDataBase;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -30,7 +30,7 @@ public class ConnectionSignaalDataBase {
         //Class Variable
         Connection conn;
         PreparedStatement prepStat;
-        Database myDatabase;
+        ConnectionDataBase myDatabase;
         String user;
         String pass;
         String driver;
@@ -40,9 +40,9 @@ public class ConnectionSignaalDataBase {
         //Constructor
         public ConnectionSignaalDataBase() throws ClassNotFoundException {
             
-            myDatabase = new Database();
+            myDatabase = new ConnectionDataBase();
             driver = myDatabase.getDriver();
-            url = myDatabase.getUrl();
+            url = myDatabase.getURLDB();
             
             Class.forName(driver);
             

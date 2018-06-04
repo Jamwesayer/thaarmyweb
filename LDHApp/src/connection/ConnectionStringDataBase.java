@@ -5,7 +5,7 @@
  */
 package connection;
 
-import Database.Database;
+import ldhapp.ConnectionDataBase;
 import static connection.ConnectionSignaalDataBase.infoBox;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -21,17 +21,17 @@ import model.ConnectionString;
 public class ConnectionStringDataBase {
     Connection conn;
     PreparedStatement prepStat;
-    Database myDatabase;
+    ConnectionDataBase myDatabase;
 
     String user;
     String pass;
 
     //Constructor
     public ConnectionStringDataBase() throws ClassNotFoundException{
-        myDatabase = new Database();
+        myDatabase = new ConnectionDataBase();
 
         String driver = myDatabase.getDriver();
-        String url = myDatabase.getUrl();
+        String url = myDatabase.getURLDB();
         Class.forName(driver);
         try {
             conn = DriverManager.getConnection(url);
