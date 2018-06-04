@@ -52,14 +52,10 @@ class AfwijkingLijst extends JPanel{
             SignaalLijst mySignaalLijst = new SignaalLijst();
             ArrayList<Signaal> list = mySignaalLijst.getSignalen();
             
-            for(Signaal signaal : list){
+            for(Signaal signaal : list) {
                 model.addElement(signaal.getAlgemene_tekst());
             }
             
-            /*for (int i = 0; i < 15; i++)
-            {
-                model.addElement("Element " + i);
-            }*/
             jList = new JList(model);
             
             scroller = new JScrollPane(jList);

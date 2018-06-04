@@ -62,8 +62,6 @@ public class SignaalLijst {
             stmt = con.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,ResultSet.CONCUR_READ_ONLY);            
             
             callQueries();
-            System.out.println(count);
-            //bepaalSignaalAdAfas(driver, url);
         }     
     
     //Getter
@@ -84,6 +82,8 @@ public class SignaalLijst {
         
         boolean duplicate = false;
 
+        
+        
         for(Signaal i : signaal){
             if(i.getUserID().replaceAll("\\s+","").equals(auditName.replaceAll("\\s+",""))){
                 for(String check : checkers){
@@ -140,7 +140,7 @@ public class SignaalLijst {
         String type = "Medewerker uit dienst";
         String typeSignal = "MwUitDi";
         String auditName = "EmployeeUsername";
-        count[0] = count[0]++;
+        count[0] = count[0] + 1;
         initQuery(sql,text,type,typeSignal, auditName);
     }
 
@@ -152,7 +152,7 @@ public class SignaalLijst {
         String type = "ba account not in profit";
         String typeSignal = "BAAccNotProf";
         String auditName = "EmployeeUsername";
-        count[0] = count[0]++;
+        count[0] = count[0] + 1;
         initQuery(sql,text,type,typeSignal, auditName);
     }
 
@@ -164,7 +164,7 @@ public class SignaalLijst {
         String type = "geen naam clevernew";
         String typeSignal = "NaamClevernew";
         String auditName = "PersoonID";
-        count[1] = count[1]++;
+        count[1] = count[1] + 1;
         initQuery(sql,text,type,typeSignal,auditName);
 
     }
@@ -176,7 +176,7 @@ public class SignaalLijst {
         String type = "clevernew niet in ad";
         String typeSignal = "ClevernewNietAd";
         String auditName = "PersoonID";
-        count[1] = count[1]++;
+        count[1] = count[1] + 1;
         initQuery(sql,text,type,typeSignal,auditName);
     }
 
@@ -189,7 +189,7 @@ public class SignaalLijst {
         String type = "account ad actief";
         String typeSignal = "accadact";
         String auditName = "Username_Pre2000";
-        count[1] = count[1]++;
+        count[1] = count[1] + 1;
         initQuery(sql,text,type,typeSignal,auditName);
     }
 
@@ -201,7 +201,7 @@ public class SignaalLijst {
         String type = "account onbekend clever";
         String typeSignal = "acconbclever";
         String auditName = "Username_Pre2000";
-        count[1] = count[1]++;
+        count[1] = count[1] + 1;
         initQuery(sql, text, type, typeSignal, auditName);
     }
 
@@ -214,7 +214,7 @@ public class SignaalLijst {
         String type = "usernaam niet in clever";
         String typeSignal = "UserNietClever";
         String auditName = "EmployeeUsername";
-        count[2] = count[2]++;
+        count[2] = count[2] + 1;
         initQuery(sql, text, type, typeSignal, auditName);
     }
 
@@ -227,7 +227,7 @@ public class SignaalLijst {
         String type = "clever actief medewerker uit dienst";
         String typeSignal = "clevAcMedeDienst";
         String auditName = "EmployeeUsername";
-        count[2] = count[2]++;
+        count[2] = count[2]+1;
         initQuery(sql, text, type, typeSignal ,auditName);
         
     }
@@ -240,7 +240,7 @@ public class SignaalLijst {
         String type = "usernaam niet in afas";
         String typeSignal = "userNietAfas";
         String auditName = "PersoonID";
-        count[2] = count[2]++;
+        count[2] = count[2]+1;
         initQuery(sql, text, type, typeSignal, auditName);
     }
 

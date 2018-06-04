@@ -30,6 +30,7 @@ public class Signaal {
     private String impactEntiteit;
     private String impactOrganisatie;
     private ConnectionString connection;
+    private Boolean duplicatie;
     
     //Constructor
     public Signaal(String userID, int connectieString, String signaalType, String algemene_tekst, String variable_tekst, Date eersteOptreden, Date opgelost) {
@@ -40,6 +41,7 @@ public class Signaal {
         this.connectieString = connectieString;
         this.eersteOptreden = eersteOptreden;
         this.opgelost = opgelost;
+        this.duplicatie = false;
     }
     
     //Test Constructor
@@ -50,7 +52,16 @@ public class Signaal {
         this.variable_tekst = variable_tekst;
         this.eersteOptreden = eersteOptreden;
         this.connectieString = connectieString;
+        this.duplicatie = false;
     }    
+    
+    public void setDuplicatie(Boolean duplicatie) {
+        this.duplicatie = duplicatie;
+    }
+    
+    public Boolean getDuplicatie() {
+        return duplicatie;
+    }
     
     //Method voor object testen.
     public void showSignaal() {
@@ -89,7 +100,7 @@ public class Signaal {
     
     //Method om Signaal toetevoegen in tabel
     public boolean addToSignalTable(DefaultTableModel tableModel) {   
-        tableModel.addRow(new Object[] {algemene_tekst,variable_tekst,connection.getConnectionString(),eersteOptreden,opgelost
+        tableModel.addRow(new Object[] {algemene_tekst,variable_tekst,"fdsa"/*connection.getConnectionString()*/,eersteOptreden,opgelost
                 ,impactEntiteit,impactOrganisatie});
         return false;
     }

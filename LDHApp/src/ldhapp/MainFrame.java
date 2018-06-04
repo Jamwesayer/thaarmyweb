@@ -5,6 +5,7 @@
  */
 package ldhapp;
 
+import connection.ConnectionSignaalDataBase;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
@@ -18,6 +19,7 @@ import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,6 +37,7 @@ import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 import javax.swing.Timer;
 import javax.swing.table.DefaultTableModel;
+import model.Signaal;
 import model.SignaalLijst;
 
 /**
@@ -43,7 +46,7 @@ import model.SignaalLijst;
  */
 public class MainFrame extends JFrame  implements ActionListener{
  private static JPanel linkerPanel;
-  private static JPanel middelpuntPanel;
+ private static JPanel middelpuntPanel;
  private static JPanel rechterPanel;
  
  
@@ -97,12 +100,24 @@ public class MainFrame extends JFrame  implements ActionListener{
     private JPanel iTabelPanel;
 
     private static DefaultTableModel table_model;
-    
+    private ConnectionSignaalDataBase signalDB;
+    private SignaalLijst signaalLijst;
+    private ArrayList<Signaal> afwijkingen;
+    private ArrayList<Signaal> signalen;
     
     public MainFrame(String title, ConnectionDataBase db)
     {
-        //setting
         super(title);
+        try {
+            signaalLijst = new SignaalLijst();
+            signalDB = new ConnectionSignaalDataBase();
+        } catch (ClassNotFoundException | ParseException | SQLException ex) {
+            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        signalen = signalDB.showSignalen();
+        afwijkingen = signaalLijst.getSignalen();
+        
+        //setting
         setLayout(new BorderLayout());
         STANDAARD = new GridLayout();
         DB = db;
@@ -115,7 +130,7 @@ public class MainFrame extends JFrame  implements ActionListener{
         middelpuntPanel = new JPanel();
         setMiddelpuntPanel();
         
-        rechterPanel = new RechterPanel(db);
+        rechterPanel = new RechterPanel(db,signaalLijst);
         setRechterPanel();
         
         c.add(linkerPanel,BorderLayout.WEST);
@@ -322,9 +337,7 @@ public class MainFrame extends JFrame  implements ActionListener{
         Date d = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("hh:mm:ss");
         liveTime.setText("Tijd: "+ sdf.format(d));
-  }
-    
-    
+    }
     
     public void setMiddelpuntPanel()
     {
@@ -340,11 +353,10 @@ public class MainFrame extends JFrame  implements ActionListener{
     
     public void setSTablePanel(JPanel sTabelPanel)
     {
-        
         sTabelPanel.setLayout(STANDAARD);
         sTabelPanel.setBorder(BorderFactory.createTitledBorder("Activiteiten"));
         
-        String kolom_namen[] = {"Naam","Variable","Connectiestring","Datum","Huidige datum","Opgelost Datum"
+        String kolom_namen[] = {"Naam","Variable","Connectiestring","Datum","Opgelost Datum"
                 , "Impact matrix entiteiten"
                 , "Impact matrix organisaties"};
 
@@ -352,7 +364,31 @@ public class MainFrame extends JFrame  implements ActionListener{
         JScrollPane tableSP = new JScrollPane(table);
         table_model = (DefaultTableModel) table.getModel();
         table_model.setColumnIdentifiers(kolom_namen);        
-        table.setModel(table_model); 
+        table.setModel(table_model);
+        
+        boolean in = false;
+        for(Signaal signaal : signalen) {
+            in = false;
+            for(Signaal signaal2 : afwijkingen) {
+                if(signaal.getUserID() == null ? signaal2.getUserID() == null : signaal.getUserID().replaceAll("\\s+","").equals(signaal2.getUserID())){
+                    //Er bestaat duplicatie
+                    in = true;
+                    signaal2.setDuplicatie(true);
+                    break;
+                }
+            }
+            if(!in){
+                Date date = new Date();
+                signaal.setOpgelost(date);                
+            }
+            signaal.addToSignalTable(table_model);
+        }
+        
+        for(Signaal signaal : afwijkingen) {
+            if(!signaal.getDuplicatie()) {
+                signaal.addToSignalTable(table_model);                
+            }
+        }
         
         sTabelPanel.add(tableSP);
     }
@@ -373,6 +409,7 @@ public class MainFrame extends JFrame  implements ActionListener{
         scroller = new JScrollPane(jList);
         jList.setBackground(Color.WHITE);
         afwijkingPanel = new JPanel();
+        afwijkingPanel.setPreferredSize(new Dimension(100,100));
         afwijkingPanel.setLayout(STANDAARD);
         afwijkingPanel.add(scroller);
         afwijkingPanel.setBorder(BorderFactory.createTitledBorder("Alle gevonden afwijkingen"));
@@ -385,21 +422,14 @@ public class MainFrame extends JFrame  implements ActionListener{
         businessRulePanel.add(scrollTekst);
         businessRulePanel.setBorder(BorderFactory.createTitledBorder("Aantal Afwijkingen per Business Rules"));
         String BRPText = "";
-        SignaalLijst lijst = null;
-        try {
-            lijst = new SignaalLijst();
-        } catch (ClassNotFoundException | ParseException | SQLException ex) {
-            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        int[] afwijkingen = lijst.getCount();
+        int[] afwijkingenNummer = signaalLijst.getCount();
         String[] afwijkingenText = {"Vergelijk Profit met AD ","Vergelijk Clever met de AD ", "Vergelijk Profit met Clever "};
         int count = 0;
         for(String string : afwijkingenText){
-            BRPText += string + afwijkingen[count] + "Gevonden. \n";
+            BRPText += string + afwijkingenNummer[count] + " Gevonden. \n";
             count++;
         }
         afwijkAantal.setText(BRPText);
-        System.out.println(BRPText);
     }
 
     public void addBothList()

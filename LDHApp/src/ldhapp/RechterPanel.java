@@ -44,25 +44,25 @@ public class RechterPanel extends JPanel {
     private GridBagConstraints gc;
     
 
-    public RechterPanel(ConnectionDataBase db)
+    public RechterPanel(ConnectionDataBase db, SignaalLijst signaalLijst)
     {
         setLayout(new GridBagLayout()); // aantalRij, aantalKolom,VerticaalGap,HorizontaalGap
         STANDAARD = new GridLayout();
         setPreferredSize(new Dimension(355,0));
         setBorder(BorderFactory.createTitledBorder("Gevonden afwijkingen"));
 
-        setPanel();
+        setPanel(signaalLijst);
         addPanel();
         //afwijkingLijst = new AfwijkingLijst();
         //add(afwijkingLijst);
     }
     
-    public void setPanel()
+    public void setPanel(SignaalLijst signaalLijst)
     {
-        try {
+        //try {
             model = new DefaultListModel();
             
-            SignaalLijst mySignaalLijst = new SignaalLijst();
+            SignaalLijst mySignaalLijst = signaalLijst;
             ArrayList<Signaal> list = mySignaalLijst.getSignalen();
             
             for(Signaal signaal : list){
@@ -76,8 +76,12 @@ public class RechterPanel extends JPanel {
             afwijkingPanel.setLayout(STANDAARD);
             afwijkingPanel.add(scroller);
             afwijkingPanel.setBorder(BorderFactory.createTitledBorder("Alle gevonden afwijkingen"));
+            afwijkingPanel.setMaximumSize( new Dimension(
+                Integer.MAX_VALUE,
+                200)
+            );
             
-            tekstLog = new JTextArea(10,12);
+            tekstLog = new JTextArea(100,12);
             tekstLog.setEditable(false);
             scrollTekst = new JScrollPane(tekstLog,  JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
             businessRulePanel = new JPanel();
@@ -85,9 +89,9 @@ public class RechterPanel extends JPanel {
             businessRulePanel.add(scrollTekst);
             businessRulePanel.setBorder(BorderFactory.createTitledBorder("Aantal Afwijkingen per Business Rules"));
             
-        } catch (ClassNotFoundException | ParseException | SQLException ex) {
+        /*} catch (ClassNotFoundException | ParseException | SQLException ex) {
             Logger.getLogger(RechterPanel.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        }*/
     }
 
     public void addPanel()
